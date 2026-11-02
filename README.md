@@ -1,4 +1,4 @@
-# EFCH Lang — research artifacts (EXP-004 to EXP-015)
+# EFCH P2 artifacts — Verified Binary Decoding with EFCH Lang (EXP-004 to EXP-015)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23874419.svg)](https://doi.org/10.5281/zenodo.23874419)
 
@@ -79,7 +79,7 @@ the decisions and interpretation.
 
 Other VentureSynaptic Labs artifact packages for EFCH (one repository and DOI per manuscript):
 
-- [efch-artifacts-exp019](https://github.com/venture-synaptic/efch-artifacts-exp019): EXP-019, semantic evidence persistence (DOI [10.5281/zenodo.23873678](https://doi.org/10.5281/zenodo.23873678)).
+- [efch-artifacts-p1-evidence-persistence](https://github.com/venture-synaptic/efch-artifacts-p1-evidence-persistence): EXP-019, semantic evidence persistence (DOI [10.5281/zenodo.23873678](https://doi.org/10.5281/zenodo.23873678)).
 
 ## License
 
