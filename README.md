@@ -1,5 +1,10 @@
 # EFCH Lang — research artifacts (EXP-004 to EXP-015)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23874419.svg)](https://doi.org/10.5281/zenodo.23874419)
+
+Archived at Zenodo: all versions [10.5281/zenodo.23874419](https://doi.org/10.5281/zenodo.23874419);
+version `v1.0-lang` [10.5281/zenodo.23874420](https://doi.org/10.5281/zenodo.23874420). See `CITATION.cff`.
+
 Artifacts for the draft manuscript *Verified Binary Decoding with a Domain-Specific Language: An
 Empirical Study of EFCH Lang against C, Rust–Kani, and Dafny* (`paper/`, version 0.2).
 

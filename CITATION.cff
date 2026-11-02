@@ -11,3 +11,10 @@ repository-code: "https://github.com/venture-synaptic/efch-artifacts-lang"
 license: Apache-2.0
 version: "v1.0-lang"
 date-released: "2026-11-02"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.23874419"
+    description: "Concept DOI (all versions)"
+  - type: doi
+    value: "10.5281/zenodo.23874420"
+    description: "Version v1.0-lang"
