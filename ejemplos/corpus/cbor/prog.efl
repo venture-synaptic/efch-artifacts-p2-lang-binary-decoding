@@ -1,0 +1,16 @@
+// Cabecera de un elemento CBOR (RFC 8949, §3); información adicional 28..31 es error. EXP-005.
+fn cbor_head_decode(buf: bytes[9]) -> option(u8, u64, u8) implements cbor-head-decode {
+    if buf.len == 0 { return none }
+    let major = buf[0] >> 5
+    let info = buf[0] & 0x1f
+    if info < 24 { return some(major, info, 1) }
+    if info > 27 { return none }
+    let extra = 1 << (info & 3)
+    if buf.len < extra + 1 { return none }
+    var arg: u64 = 0
+    for i in 1..=extra {
+        arg = arg << 8 | buf[i]
+    }
+    if major == 7 && info == 24 && arg < 32 { return none }
+    return some(major, arg, extra + 1)
+}

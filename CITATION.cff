@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use these artifacts, please cite them as below."
+title: "EFCH Lang research artifacts (EXP-004 to EXP-015)"
+type: software
+authors:
+  - family-names: "Cueva Huari"
+    given-names: "Erik Fisher"
+    orcid: "https://orcid.org/0000-0001-7268-5510"
+    affiliation: "VentureSynaptic Labs"
+repository-code: "https://github.com/venture-synaptic/efch-lang-artifacts"
+license: Apache-2.0
+version: "v1.0-lang"
+date-released: "2026-11-02"

@@ -1,0 +1,32 @@
+// Nombre de host (RFC 1123 §2.1, RFC 952) en formato de cable DNS (RFC 1035 §3.1 y §4.1.4). EXP-009.
+// Tercera escritura: un `fold` de 32 pasos sobre `step`, que avanza una etiqueta y sale en cuanto puede
+// (la etiqueta no cabe, un carácter no es LDH o se acaba la etiqueta).
+fn ldh(c: u8) -> bool {
+    return c | 0x20 >= 0x61 && c | 0x20 <= 0x7a || c >= 0x30 && c <= 0x39 || c == 0x2d
+}
+
+// Estado: etiquetas en el byte alto, posición del próximo octeto de longitud en el bajo.
+fn step(b: bytes[64], s: u16) -> u16 {
+    let p = s & 0xff
+    if p >= b.len { return s }
+    let l = b[p]
+    if l < 1 || l > 63 || p + l >= b.len { return s }
+    if b[p + 1] == 0x2d || b[p + l] == 0x2d { return s }
+    let next = (s >> 8) + 1 << 8 | p + 1 + l
+    for j in 1..64 {
+        if j > l { return next }
+        if !ldh(b[p + j]) { return s }
+    }
+    return next
+}
+
+fn dns_hostname_wire(b: bytes[64]) -> option(u8, u8, u16) implements dns-hostname-wire {
+    let s = fold k in 0..32 from u16(0) with st { step(b, st) }
+    let p = s & 0xff
+    let n = s >> 8
+    if p >= b.len { return none }
+    let l = b[p]
+    if l == 0 { return some((p + 1) as u8, n as u8, 0xffff) }
+    if l & 0xc0 == 0xc0 && p + 1 < b.len { return some((p + 2) as u8, n as u8, u16(l & 0x3f) << 8 | b[p + 1]) }
+    return none
+}

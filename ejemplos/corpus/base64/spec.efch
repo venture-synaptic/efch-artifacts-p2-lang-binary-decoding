@@ -1,0 +1,40 @@
+; Bloque base64 de 4 caracteres (RFC 4648, §4). EXP-005.
+; Decisión declarada: se rechazan los bits de relleno no nulos (§3.5).
+(efch 0.1
+  (computation base64-sextet
+    (doc "Valor de un carácter del alfabeto estándar; 64 si no pertenece a él.")
+    (input c (bv 8))
+    (output (bv 8))
+    (semantics
+      (ite (all (uge c #x41) (ule c #x5a)) (sub c #x41)
+      (ite (all (uge c #x61) (ule c #x7a)) (sub c 71)
+      (ite (all (uge c #x30) (ule c #x39)) (add c 4)
+      (ite (eq c #x2b) 62
+      (ite (eq c #x2f) 63 64))))))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120)))
+
+  (computation base64-block-decode
+    (doc "4 caracteres → 1 a 3 bytes, en big-endian; '=' solo en las dos últimas posiciones.")
+    (input s (bytes 4))
+    (output (option (bv 32) (bv 8)))                 ; bytes en big-endian, número de bytes
+    (semantics
+      (ite (ne (len s) 4)
+           none
+           (let ((v0 (call base64-sextet (byte s 0))) (v1 (call base64-sextet (byte s 1)))
+                 (v2 (call base64-sextet (byte s 2))) (v3 (call base64-sextet (byte s 3)))
+                 (p2 (eq (byte s 2) #x3d)) (p3 (eq (byte s 3) #x3d)))
+             (ite (any (eq v0 64) (eq v1 64) (all p2 (not p3))
+                       (all (not p2) (eq v2 64)) (all (not p3) (eq v3 64)))
+                  none
+                  (let ((w (or (shl (zext 32 v0) 18) (shl (zext 32 v1) 12)
+                               (shl (zext 32 (ite p2 (bv 8 0) v2)) 6) (zext 32 (ite p3 (bv 8 0) v3)))))
+                    (ite p2
+                         (ite (ne (and w #xffff) 0) none (some (lshr w 16) 1))
+                         (ite p3
+                              (ite (ne (and w #xff) 0) none (some (lshr w 8) 2))
+                              (some w 3))))))))
+    (workload (seeds 20261020 1 2) (count 10000) (input s (random-bytes 3 4)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120)))
+  (baseline-c "baseline.c"))

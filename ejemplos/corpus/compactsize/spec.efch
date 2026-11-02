@@ -1,0 +1,24 @@
+; CompactSize de Bitcoin, solo en forma canónica (ReadCompactSize de Bitcoin Core). EXP-005.
+(efch 0.1
+  (computation compactsize-decode
+    (doc "< FD: el propio byte; FD, FE, FF: 2, 4 u 8 bytes little-endian, que deben superar el máximo de la forma más corta.")
+    (input buf (bytes 9))
+    (output (option (bv 64) (bv 8)))                 ; valor, bytes consumidos
+    (semantics
+      (ite (eq (len buf) 0)
+           none
+           (let ((b0 (byte buf 0)))
+             (ite (ult b0 #xfd)
+                  (some (zext 64 b0) 1)
+                  (let ((k (ite (eq b0 #xfd) (bv 8 2) (ite (eq b0 #xfe) (bv 8 4) (bv 8 8)))))
+                    (ite (ult (len buf) (add (zext 16 k) 1))
+                         none
+                         (let ((v (reduce or j 1 9
+                                    (ite (ule (bv 8 j) k) (shl (zext 64 (byte buf j)) (mul 8 (sub j 1))) (bv 64 0)))))
+                           (ite (ult v (ite (eq k 2) (bv 64 #xfd) (ite (eq k 4) (bv 64 #x10000) (bv 64 #x100000000))))
+                                none
+                                (some v (add k 1))))))))))
+    (workload (seeds 20261020 1 2) (count 10000) (input buf (random-bytes 1 9)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120)))
+  (baseline-c "baseline.c"))

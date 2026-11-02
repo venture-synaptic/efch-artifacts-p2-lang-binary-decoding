@@ -1,0 +1,37 @@
+; Primer punto de código UTF-8 (RFC 3629, §3 y §4). EXP-005.
+(efch 0.1
+  (computation utf8-decode
+    (doc "Longitud por el byte inicial, bytes de continuación 10xxxxxx, y valor en su intervalo mínimo, fuera de sustitutos y ≤ 10FFFF.")
+    (input buf (bytes 4))
+    (output (option (bv 32) (bv 8)))                 ; punto de código, bytes consumidos
+    (semantics
+      (ite (eq (len buf) 0)
+           none
+           (let ((b0 (byte buf 0)))
+             (let ((n (ite (ult b0 #x80) (bv 8 1)
+                      (ite (ult b0 #xc0) (bv 8 0)
+                      (ite (ult b0 #xe0) (bv 8 2)
+                      (ite (ult b0 #xf0) (bv 8 3)
+                      (ite (ult b0 #xf8) (bv 8 4) (bv 8 0))))))))
+               (ite (any (eq n 0) (ult (len buf) (zext 16 n))
+                         (not (reduce all j 1 4 (any (uge (bv 8 j) n) (eq (and (byte buf j) #xc0) #x80)))))
+                    none
+                    (let ((cp (reduce or j 0 4
+                                (ite (ult (bv 8 j) n)
+                                     (shl (zext 32 (and (byte buf j)
+                                                        (ite (eq (bv 8 j) 0)
+                                                             (lshr #xff (ite (eq n 1) (bv 8 1) (add n 1)))
+                                                             #x3f)))
+                                          (zext 32 (mul 6 (sub (sub n 1) j))))
+                                     (bv 32 0)))))
+                      (ite (any (ult cp (ite (eq n 1) (bv 32 0)
+                                        (ite (eq n 2) (bv 32 #x80)
+                                        (ite (eq n 3) (bv 32 #x800) (bv 32 #x10000)))))
+                                (all (uge cp #xd800) (ule cp #xdfff))
+                                (ugt cp #x10ffff))
+                           none
+                           (some cp n))))))))
+    (workload (seeds 20261020 1 2) (count 10000) (input buf (random-bytes 1 4)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120)))
+  (baseline-c "baseline.c"))

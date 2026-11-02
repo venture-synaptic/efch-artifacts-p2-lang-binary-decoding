@@ -1,0 +1,30 @@
+; Cabecera de un elemento CBOR: tipo mayor y argumento (RFC 8949, §3). EXP-005.
+; Simplificación declarada: la información adicional 28..31 (reservada o indefinida) es error.
+(efch 0.1
+  (computation cbor-head-decode
+    (doc "3 bits de tipo mayor; 5 de información adicional: < 24 es el argumento, 24..27 da 1, 2, 4 u 8 bytes big-endian.")
+    (input buf (bytes 9))
+    (output (option (bv 8) (bv 64) (bv 8)))          ; tipo mayor, argumento, bytes consumidos
+    (semantics
+      (ite (eq (len buf) 0)
+           none
+           (let ((mt (lshr (byte buf 0) 5)) (ai (and (byte buf 0) #x1f)))
+             (ite (ult ai 24)
+                  (some mt (zext 64 ai) 1)
+                  (ite (ugt ai 27)
+                       none
+                       (let ((k (shl (bv 8 1) (sub ai 24))))
+                         (ite (ult (len buf) (add (zext 16 k) 1))
+                              none
+                              (let ((arg (reduce or j 1 9
+                                           (ite (ule (bv 8 j) k)
+                                                (shl (zext 64 (byte buf j)) (zext 64 (mul 8 (sub k j))))
+                                                (bv 64 0)))))
+                                ; §3.3: un valor simple de dos bytes (f8 xx) con xx < 32 está mal formado.
+                                (ite (all (eq mt 7) (eq ai 24) (ult arg 32))
+                                     none
+                                     (some mt arg (add k 1)))))))))))
+    (workload (seeds 20261020 1 2) (count 10000) (input buf (random-bytes 1 9)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120)))
+  (baseline-c "baseline.c"))

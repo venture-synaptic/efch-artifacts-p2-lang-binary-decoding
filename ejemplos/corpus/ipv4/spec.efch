@@ -1,0 +1,25 @@
+; Validación de cabecera IPv4 (RFC 791, §3.1) con suma de comprobación (RFC 1071). EXP-005.
+(efch 0.1
+  (computation ipv4-header-check
+    (doc "Versión 4, IHL ≥ 5, cabecera completa, longitud total ≥ cabecera y suma en complemento a uno de las palabras = FFFF.")
+    (input h (bytes 60))
+    (output (option (bv 8) (bv 16)))                 ; IHL, longitud total
+    (semantics
+      (ite (ult (len h) 20)
+           none
+           (let ((ver (lshr (byte h 0) 4)) (ihl (and (byte h 0) #x0f)))
+             (let ((hl (shl (zext 16 ihl) 2))
+                   (tot (or (shl (zext 16 (byte h 2)) 8) (zext 16 (byte h 3)))))
+               (ite (any (ne ver 4) (ult ihl 5) (ult (len h) hl) (ult tot hl))
+                    none
+                    (let ((s (reduce add j 0 30
+                               (ite (ult (bv 16 j) (shl (zext 16 ihl) 1))
+                                    (or (shl (zext 32 (byte h (mul 2 j))) 8) (zext 32 (byte h (add (mul 2 j) 1))))
+                                    (bv 32 0)))))
+                      (let ((f1 (add (and s #xffff) (lshr s 16))))
+                        (let ((f2 (add (and f1 #xffff) (lshr f1 16))))
+                          (ite (eq f2 #xffff) (some ihl tot) none)))))))))
+    (workload (seeds 20261020 1 2) (count 10000) (input h (random-bytes 18 60)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120)))
+  (baseline-c "baseline.c"))

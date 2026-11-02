@@ -1,0 +1,22 @@
+; Entero de longitud variable de QUIC (RFC 9000, §16). EXP-005.
+(efch 0.1
+  (computation quic-varint-decode
+    (doc "Los 2 bits altos del primer byte dan la longitud (1, 2, 4 u 8 bytes); el resto, en big-endian, el valor.")
+    (input buf (bytes 8))
+    (output (option (bv 64) (bv 8)))                 ; valor, bytes consumidos
+    (semantics
+      (ite (eq (len buf) 0)
+           none
+           (let ((n (shl (bv 8 1) (lshr (byte buf 0) 6))))
+             (ite (ult (len buf) (zext 16 n))
+                  none
+                  (some (reduce or j 0 8
+                          (ite (ult (bv 8 j) n)
+                               (shl (zext 64 (ite (eq (bv 8 j) 0) (and (byte buf 0) #x3f) (byte buf j)))
+                                    (zext 64 (mul 8 (sub (sub n 1) j))))
+                               (bv 64 0)))
+                        n)))))
+    (workload (seeds 20261020 1 2) (count 10000) (input buf (random-bytes 1 8)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120)))
+  (baseline-c "baseline.c"))

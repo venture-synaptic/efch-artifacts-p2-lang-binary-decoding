@@ -1,0 +1,9 @@
+(efch 0.1
+  (computation limitar-nivel
+    (doc "Limita un nivel sin signo de 8 bits a un máximo de 100.")
+    (input x (bv 8))
+    (output (bv 8))
+    (semantics (ite (ugt x 100) 100 x))
+    (budget (llm-calls 0) (llm-usd 0) (smt-seconds 5)))
+  (property cota
+    (forall ((x (bv 8))) (ule (call limitar-nivel x) 100))))

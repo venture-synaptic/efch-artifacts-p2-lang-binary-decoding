@@ -1,0 +1,52 @@
+// Cabecera IPv4 con opciones (RFC 791 §3.1; suma de control RFC 1071; Router Alert RFC 2113). EXP-015.
+// Dos `fold`: la suma de las palabras de la cabecera y el recorrido de opciones. Estado del recorrido en 64 bits:
+// posición (bits 0–7), fin (8), error (9), encaminamiento en origen (10), Router Alert vista (11),
+// número de opciones (16–23), valor de la Router Alert (32–47).
+fn hdr_len(b: bytes[60]) -> u16 {
+    if b.len < 1 { return 0 }
+    return u16(b[0] & 0x0f) * 4
+}
+
+fn sum_word(b: bytes[60], k: u16, s: u32) -> u32 {
+    let hl = hdr_len(b)
+    if 2 * k + 1 < hl && hl <= b.len { return s + u32(u16(b[2 * k]) << 8 | u16(b[2 * k + 1])) }
+    return s
+}
+
+fn step(b: bytes[60], s: u64) -> u64 {
+    let hl = hdr_len(b)
+    let p = (s & 0xff) as u16
+    if s & 0x300 != 0 || p >= hl || hl > b.len { return s }
+    let k = b[p]
+    if k == 0 { return s | 0x100 }
+    if k == 1 { return s + 1 }
+    let err = s | 0x200
+    if p + 1 >= hl { return err }
+    let l = b[p + 1]
+    if l < 2 || p + l > hl { return err }
+    let base = (s & 0xffffffffffffff00 | u64(p + l)) + 0x10000
+    if k == 131 || k == 137 {
+        if l < 3 || s & 0x400 != 0 { return err }
+        return base | 0x400
+    }
+    if k == 148 {
+        if l != 4 || s & 0x800 != 0 { return err }
+        return base | 0x800 | u64(b[p + 2]) << 40 | u64(b[p + 3]) << 32
+    }
+    return base
+}
+
+fn ipv4_header(b: bytes[60]) -> option(u8, u8, bool, u16) implements ipv4-header {
+    if b.len < 20 { return none }
+    let hl = hdr_len(b)
+    let total = u16(b[2]) << 8 | u16(b[3])
+    if b[0] >> 4 != 4 || b[0] & 0x0f < 5 || hl > b.len || total < hl { return none }
+    let s1 = fold k in 0..30 from u32(0) with s { sum_word(b, k, s) }
+    let c1 = (s1 & 0xffff) + (s1 >> 16)
+    let c2 = (c1 & 0xffff) + (c1 >> 16)
+    if c2 != 0xffff { return none }
+    let s = fold k in 0..40 from u64(20) with st { step(b, st) }
+    if s & 0x200 != 0 { return none }
+    let ra = if s & 0x800 == 0 { u16(0xffff) } else { (s >> 32) as u16 }
+    return some(hl as u8, (s >> 16) as u8, s & 0x400 != 0, ra)
+}

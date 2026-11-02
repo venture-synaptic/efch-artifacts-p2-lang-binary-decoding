@@ -1,0 +1,69 @@
+; Opciones de la cabecera TCP (RFC 9293 §3.1 y §3.2; RFC 7323 §2.2–2.3; RFC 2018 §2). EXP-010.
+; Estado del recorrido en 64 bits: posición (bits 0–7), fin (8), error (9), MSS (16–31) y visto (32),
+; escala (40–47) y vista (48), SACK permitido (49).
+(efch 0.1
+  (computation tcp-hl
+    (doc "Longitud de la cabecera en bytes (4 · data offset); 0 si el búfer no llega a 20 bytes.")
+    (input b (bytes 60))
+    (output (bv 16))
+    (semantics (ite (ult (len b) 20) (bv 16 0) (mul 4 (zext 16 (lshr (byte b 12) 4))))))
+
+  (computation tcp-step
+    (doc "Avanza una opción. Si el recorrido terminó (fin, error o p ≥ hl) o la cabecera no cabe, no cambia nada.")
+    (input b (bytes 60))
+    (input s (bv 64))
+    (output (bv 64))
+    (semantics
+      (let ((hl (call tcp-hl b))
+            (p (trunc 16 (and s #xff)))
+            (err (or s #x200)))
+        (ite (any (ne (and s #x300) 0) (uge p hl) (ugt hl (len b)))
+             s
+             (let ((k (byte b p)))
+               (ite (eq k 0)
+                    (or s #x100)
+                    (ite (eq k 1)
+                         (add s 1)
+                         (ite (uge (add p 1) hl)
+                              err
+                              (let ((l (byte b (add p 1))))
+                                (ite (any (ult l 2) (ugt (add p (zext 16 l)) hl))
+                                     err
+                                     (let ((base (or (and s #xffffffffffffff00) (zext 64 (add p (zext 16 l))))))
+                                       (ite (eq k 2)
+                                            (ite (any (ne l 4) (ne (and s #x100000000) 0))
+                                                 err
+                                                 (or base (shl (zext 64 (byte b (add p 2))) 24)
+                                                          (shl (zext 64 (byte b (add p 3))) 16) #x100000000))
+                                            (ite (eq k 3)
+                                                 (ite (any (ne l 3) (ne (and s #x1000000000000) 0))
+                                                      err
+                                                      (let ((w (byte b (add p 2))))
+                                                        (or base (shl (zext 64 (ite (ugt w 14) (bv 8 14) w)) 40)
+                                                                 #x1000000000000)))
+                                                 (ite (eq k 4)
+                                                      (ite (any (ne l 2) (ne (and s #x2000000000000) 0))
+                                                           err
+                                                           (or base #x2000000000000))
+                                                      base))))))))))))))
+
+  (computation tcp-options
+    (doc "Valida la cabecera y recorre como mucho 40 opciones desde el byte 20 (cada una ocupa al menos un byte de los 40 posibles).")
+    (input b (bytes 60))
+    (output (option (bv 8) (bv 16) (bv 8) bool))      ; hl, MSS (FFFF si no hay), escala (FF si no hay), SACK permitido
+    (semantics
+      (ite (ult (len b) 20)
+           none
+           (let ((doff (lshr (byte b 12) 4)) (hl (call tcp-hl b)))
+             (ite (any (ult doff 5) (ugt hl (len b)))
+                  none
+                  (let ((s (fold k 0 40 (st (bv 64 20)) (call tcp-step b st))))
+                    (ite (ne (and s #x200) 0)
+                         none
+                         (some (trunc 8 hl)
+                               (ite (eq (and s #x100000000) 0) #xffff (trunc 16 (lshr s 16)))
+                               (ite (eq (and s #x1000000000000) 0) #xff (trunc 8 (lshr s 40)))
+                               (ne (and s #x2000000000000) 0))))))))
+    (workload (seeds 20261022 1 2) (count 10000) (input b (random-bytes 1 60)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120))))

@@ -1,0 +1,16 @@
+// Entero de HPACK con prefijo de N bits (RFC 7541, §5.1), valor ≤ 2^32-1 y ≤ 6 bytes. EXP-005.
+fn hpack_int_decode(n: u8, buf: bytes[6]) -> option(u32, u8) implements hpack-int-decode {
+    if n < 1 || n > 8 || buf.len == 0 { return none }
+    let mask = ((u16(1) << n) - 1) as u8
+    var value: u64 = buf[0] & mask
+    if value < mask { return some(value as u32, 1) }
+    for i in 1..min(buf.len, 6) {
+        let b = buf[i]
+        value += u64(b & 0x7f) << (7 * (i - 1))
+        if b & 0x80 == 0 {
+            if value > 0xffffffff { return none }
+            return some(value as u32, i + 1)
+        }
+    }
+    return none
+}

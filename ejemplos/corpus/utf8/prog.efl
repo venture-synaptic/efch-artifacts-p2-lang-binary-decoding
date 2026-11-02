@@ -1,0 +1,18 @@
+// Primer punto de código UTF-8 (RFC 3629, §3 y §4). EXP-005.
+fn utf8_decode(buf: bytes[4]) -> option(u32, u8) implements utf8-decode {
+    if buf.len == 0 { return none }
+    let b0 = buf[0]
+    if b0 < 0x80 { return some(b0, 1) }
+    if b0 < 0xc0 || b0 >= 0xf8 { return none }
+    let n: u8 = if b0 < 0xe0 { 2 } else if b0 < 0xf0 { 3 } else { 4 }
+    if buf.len < n { return none }
+    var cp: u32 = b0 & (0x7f >> n)
+    for i in 1..n {
+        let b = buf[i]
+        if b & 0xc0 != 0x80 { return none }
+        cp = cp << 6 | (b & 0x3f)
+    }
+    let min: u32 = if n == 2 { 0x80 } else if n == 3 { 0x800 } else { 0x10000 }
+    if cp < min || (cp >= 0xd800 && cp <= 0xdfff) || cp > 0x10ffff { return none }
+    return some(cp, n)
+}

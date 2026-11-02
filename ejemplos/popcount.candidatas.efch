@@ -1,0 +1,19 @@
+; Candidatas escritas a mano para popcount.efch, para probar el verificador.
+
+(efch 0.1
+
+  ; SWAR clásico: sumas por parejas, nibbles y bytes; multiplicación para acumular.
+  (candidate swar (implements popcount64)
+    (body
+      (let ((a (sub x (and (lshr x 1) #x5555555555555555)))
+            (b (add (and a #x3333333333333333) (and (lshr a 2) #x3333333333333333)))
+            (c (and (add b (lshr b 4)) #x0f0f0f0f0f0f0f0f)))
+        (trunc 8 (lshr (mul c #x0101010101010101) 56)))))
+
+  ; Error deliberado: la máscara de nibbles pierde el bit alto de cada byte.
+  (candidate swar-erronea (implements popcount64)
+    (body
+      (let ((a (sub x (and (lshr x 1) #x5555555555555555)))
+            (b (add (and a #x3333333333333333) (and (lshr a 2) #x3333333333333333)))
+            (c (and (add b (lshr b 4)) #x070707070707070f)))
+        (trunc 8 (lshr (mul c #x0101010101010101) 56))))))

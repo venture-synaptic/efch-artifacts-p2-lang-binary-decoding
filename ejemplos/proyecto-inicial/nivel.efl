@@ -1,0 +1,4 @@
+fn limitar_nivel(x: u8) -> u8 implements limitar-nivel {
+    if x <= 100 { return x }
+    return 100
+}

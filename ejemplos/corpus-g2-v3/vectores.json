@@ -1,0 +1,186 @@
+{
+ "dns-hostname-wire": {
+  "fuente": "RFC 1035 §3.1 y §4.1.4; RFC 1123 §2.1; RFC 952; RFC 6891 §5. Los casos con 'derivado' se derivan de las reglas, no del texto",
+  "salida": [
+   "consumidos u8",
+   "etiquetas u8",
+   "puntero u16 (FFFF si termina en 0)"
+  ],
+  "casos": [
+   {
+    "in": "014603495349044152504100",
+    "out": [
+     12,
+     3,
+     65535
+    ],
+    "nota": "RFC 1035 §4.1.4: F.ISI.ARPA"
+   },
+   {
+    "in": "03464f4fc014",
+    "out": [
+     6,
+     1,
+     20
+    ],
+    "nota": "RFC 1035 §4.1.4: FOO + puntero al desplazamiento 20"
+   },
+   {
+    "in": "c01a",
+    "out": [
+     2,
+     0,
+     26
+    ],
+    "nota": "RFC 1035 §4.1.4: ARPA como puntero al desplazamiento 26"
+   },
+   {
+    "in": "00",
+    "out": [
+     1,
+     0,
+     65535
+    ],
+    "nota": "RFC 1035 §4.1.4: raíz"
+   },
+   {
+    "in": "022d6100",
+    "out": null,
+    "nota": "RFC 952: guion al principio",
+    "derivado": true
+   },
+   {
+    "in": "02612d00",
+    "out": null,
+    "nota": "RFC 952: guion al final",
+    "derivado": true
+   },
+   {
+    "in": "012d00",
+    "out": null,
+    "nota": "RFC 952: etiqueta '-'",
+    "derivado": true
+   },
+   {
+    "in": "03615f6200",
+    "out": null,
+    "nota": "RFC 952: '_' no está en LDH",
+    "derivado": true
+   },
+   {
+    "in": "03612e6200",
+    "out": null,
+    "nota": "RFC 952: '.' dentro de la etiqueta",
+    "derivado": true
+   },
+   {
+    "in": "0261e900",
+    "out": null,
+    "nota": "octeto no ASCII",
+    "derivado": true
+   },
+   {
+    "in": "0433636f6d03636f6d00",
+    "out": [
+     10,
+     2,
+     65535
+    ],
+    "nota": "RFC 1123 §2.1: 3com.com",
+    "derivado": true
+   },
+   {
+    "in": "03612d6200",
+    "out": [
+     5,
+     1,
+     65535
+    ],
+    "nota": "a-b",
+    "derivado": true
+   },
+   {
+    "in": "03417a3900",
+    "out": [
+     5,
+     1,
+     65535
+    ],
+    "nota": "Az9: mayúsculas, minúsculas y dígitos",
+    "derivado": true
+   },
+   {
+    "in": "016100ffff",
+    "out": [
+     3,
+     1,
+     65535
+    ],
+    "nota": "bytes después del terminador",
+    "derivado": true
+   },
+   {
+    "in": "3e616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616100",
+    "out": [
+     64,
+     1,
+     65535
+    ],
+    "nota": "etiqueta de 62 que llena el búfer de 64",
+    "derivado": true
+   },
+   {
+    "in": "0161",
+    "out": null,
+    "nota": "RFC 1035: sin terminador",
+    "derivado": true
+   },
+   {
+    "in": "",
+    "out": null,
+    "nota": "búfer vacío",
+    "derivado": true
+   },
+   {
+    "in": "0161c0",
+    "out": null,
+    "nota": "RFC 1035 §4.1.4: puntero truncado",
+    "derivado": true
+   },
+   {
+    "in": "05616200",
+    "out": null,
+    "nota": "la etiqueta no cabe",
+    "derivado": true
+   },
+   {
+    "in": "4000",
+    "out": null,
+    "nota": "RFC 6891 §5: tipo 01 (extendido)",
+    "derivado": true
+   },
+   {
+    "in": "8000",
+    "out": null,
+    "nota": "RFC 6891 §5: tipo 10 (reservado)",
+    "derivado": true
+   },
+   {
+    "in": "bf00",
+    "out": null,
+    "nota": "RFC 6891 §5: tipo 10, longitud máxima",
+    "derivado": true
+   },
+   {
+    "in": "ffff",
+    "out": [
+     2,
+     0,
+     16383
+    ],
+    "nota": "puntero máximo (3FFF)",
+    "derivado": true
+   }
+  ]
+ }
+}

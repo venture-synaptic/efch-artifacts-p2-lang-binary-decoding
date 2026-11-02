@@ -1,0 +1,30 @@
+; Recuento de bits a 1 en un entero de 64 bits.
+; Clásico de la superoptimización: la definición suma bit a bit y la
+; implementación interesa que no lo haga.
+
+(efch 0.1
+
+  (computation popcount64
+    (doc "Número de bits a 1 de x.")
+    (input x (bv 64))
+    (output (bv 8))
+    (semantics
+      (reduce add i 0 64 (trunc 8 (and (lshr x i) 1))))
+    (workload
+      (seeds 20261020 1 2)
+      (count 10000)
+      (input x (bits 64)))
+    (objective (minimize time))
+    (budget (llm-calls 4) (llm-usd 1.5) (smt-seconds 30)))
+
+  (property cota
+    (forall ((x (bv 64)))
+      (ule (call popcount64 x) 64)))
+
+  ; popcount(x) + popcount(not x) = 64. Compara dos árboles de sumadores
+  ; independientes: se espera «desconocido» con el presupuesto de 30 s.
+  (property complemento
+    (forall ((x (bv 64)))
+      (eq (add (call popcount64 x) (call popcount64 (not x))) 64)))
+
+  (baseline-c "popcount.baseline.c"))

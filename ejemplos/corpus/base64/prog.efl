@@ -1,0 +1,31 @@
+// Bloque base64 de 4 caracteres (RFC 4648, §4); bits de relleno no nulos rechazados. EXP-005.
+fn sextet(c: u8) -> u8 {
+    if c >= 0x41 && c <= 0x5a { return c - 0x41 }
+    if c >= 0x61 && c <= 0x7a { return c - 0x61 + 26 }
+    if c >= 0x30 && c <= 0x39 { return c - 0x30 + 52 }
+    if c == 0x2b { return 62 }
+    if c == 0x2f { return 63 }
+    return 64
+}
+
+fn base64_block_decode(s: bytes[4]) -> option(u32, u8) implements base64-block-decode {
+    if s.len != 4 { return none }
+    let a = sextet(s[0])
+    let b = sextet(s[1])
+    if a == 64 || b == 64 { return none }
+    let w: u32 = u32(a) << 18 | u32(b) << 12
+    if s[2] == 0x3d && s[3] == 0x3d {
+        if w & 0xffff != 0 { return none }
+        return some(w >> 16, 1)
+    }
+    let c = sextet(s[2])
+    if c == 64 { return none }
+    let w3 = w | u32(c) << 6
+    if s[3] == 0x3d {
+        if w3 & 0xff != 0 { return none }
+        return some(w3 >> 8, 2)
+    }
+    let d = sextet(s[3])
+    if d == 64 { return none }
+    return some(w3 | d, 3)
+}

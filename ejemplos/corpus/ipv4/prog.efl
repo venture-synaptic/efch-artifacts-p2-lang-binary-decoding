@@ -1,0 +1,17 @@
+// Validación de cabecera IPv4 (RFC 791, §3.1) con suma de comprobación (RFC 1071). EXP-005.
+fn ipv4_header_check(h: bytes[60]) -> option(u8, u16) implements ipv4-header-check {
+    if h.len < 20 { return none }
+    let version = h[0] >> 4
+    let ihl = h[0] & 0x0f
+    let header_len = u16(ihl) * 4
+    let total = u16(h[2]) << 8 | h[3]
+    if version != 4 || ihl < 5 || h.len < header_len || total < header_len { return none }
+    var sum: u32 = 0
+    for i in 0..ihl * 2 {
+        sum += u32(h[2 * i]) << 8 | h[2 * i + 1]
+    }
+    sum = (sum & 0xffff) + (sum >> 16)
+    sum = (sum & 0xffff) + (sum >> 16)
+    if sum != 0xffff { return none }
+    return some(ihl, total)
+}

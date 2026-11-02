@@ -1,0 +1,141 @@
+{
+  "_doc": "Vectores de EXP-005, tomados de cada fuente antes de escribir especificaciones. 'in' son bytes en hexadecimal; 'out' es null (error) o la tupla de salida. Los enteros negativos de MessagePack se dan en complemento a dos de 64 bits.",
+  "quic-varint-decode": {
+    "fuente": "RFC 9000, apéndice A.1",
+    "salida": ["valor u64", "longitud u8"],
+    "casos": [
+      {"in": "c2197c5eff14e88c", "out": [151288809941952652, 8]},
+      {"in": "9d7f3e7d", "out": [494878333, 4]},
+      {"in": "7bbd", "out": [15293, 2]},
+      {"in": "25", "out": [37, 1]},
+      {"in": "4025", "out": [37, 2]},
+      {"in": "", "out": null, "nota": "vacía"},
+      {"in": "9d7f3e", "out": null, "nota": "truncada"}
+    ]
+  },
+  "hpack-int-decode": {
+    "fuente": "RFC 7541, apéndice C.1",
+    "entrada_extra": "prefijo N (bits)",
+    "salida": ["valor u32", "longitud u8"],
+    "casos": [
+      {"n": 5, "in": "0a", "out": [10, 1], "nota": "C.1.1"},
+      {"n": 5, "in": "1f9a0a", "out": [1337, 3], "nota": "C.1.2"},
+      {"n": 8, "in": "2a", "out": [42, 1], "nota": "C.1.3"},
+      {"n": 5, "in": "ea", "out": [10, 1], "nota": "C.1.1 con bits altos a 1: se ignoran"},
+      {"n": 5, "in": "1f9a", "out": null, "nota": "truncada"}
+    ]
+  },
+  "cbor-head-decode": {
+    "fuente": "RFC 8949, apéndice A (solo la cabecera)",
+    "salida": ["tipo mayor u8", "argumento u64", "longitud u8"],
+    "casos": [
+      {"in": "00", "out": [0, 0, 1]},
+      {"in": "17", "out": [0, 23, 1]},
+      {"in": "1818", "out": [0, 24, 2]},
+      {"in": "1864", "out": [0, 100, 2]},
+      {"in": "1903e8", "out": [0, 1000, 3]},
+      {"in": "1a000f4240", "out": [0, 1000000, 5]},
+      {"in": "1b000000e8d4a51000", "out": [0, 1000000000000, 9]},
+      {"in": "1bffffffffffffffff", "out": [0, 18446744073709551615, 9]},
+      {"in": "20", "out": [1, 0, 1], "nota": "-1"},
+      {"in": "3863", "out": [1, 99, 2], "nota": "-100"},
+      {"in": "3903e7", "out": [1, 999, 3], "nota": "-1000"},
+      {"in": "40", "out": [2, 0, 1]},
+      {"in": "60", "out": [3, 0, 1]},
+      {"in": "80", "out": [4, 0, 1]},
+      {"in": "a0", "out": [5, 0, 1]},
+      {"in": "f4", "out": [7, 20, 1], "nota": "false"},
+      {"in": "f6", "out": [7, 22, 1], "nota": "null"},
+      {"in": "5f", "out": null, "nota": "longitud indefinida (simplificación)"},
+      {"in": "1c", "out": null, "nota": "información adicional reservada"},
+      {"in": "1903", "out": null, "nota": "truncada"},
+      {"in": "f800", "out": null, "nota": "§3.3: valor simple de dos bytes < 32, mal formado (añadido tras la revisión de Codex)"},
+      {"in": "f814", "out": null, "nota": "§3.3: mal formado"},
+      {"in": "f81f", "out": null, "nota": "§3.3: mal formado"},
+      {"in": "f820", "out": [7, 32, 2], "nota": "§3.3: valor simple 32, bien formado"}
+    ]
+  },
+  "utf8-decode": {
+    "fuente": "RFC 3629, §3, §4 y ejemplos de §7 y §10",
+    "salida": ["punto de código u32", "longitud u8"],
+    "casos": [
+      {"in": "41", "out": [65, 1]},
+      {"in": "e289a2", "out": [8802, 3], "nota": "U+2262"},
+      {"in": "ce91", "out": [913, 2], "nota": "U+0391"},
+      {"in": "ed959c", "out": [54620, 3], "nota": "U+D55C"},
+      {"in": "e697a5", "out": [26085, 3], "nota": "U+65E5"},
+      {"in": "efbbbf", "out": [65279, 3], "nota": "U+FEFF"},
+      {"in": "f0a38eb4", "out": [144308, 4], "nota": "U+233B4"},
+      {"in": "c080", "out": null, "nota": "forma no mínima"},
+      {"in": "eda080", "out": null, "nota": "sustituto U+D800"},
+      {"in": "f4908080", "out": null, "nota": "mayor que U+10FFFF"},
+      {"in": "80", "out": null, "nota": "continuación suelta"},
+      {"in": "e289", "out": null, "nota": "truncada"}
+    ]
+  },
+  "base64-block-decode": {
+    "fuente": "RFC 4648, §4 y vectores de §10",
+    "salida": ["bytes en big-endian u32", "número de bytes u8"],
+    "casos": [
+      {"in": "5a673d3d", "out": [102, 1], "nota": "Zg== → f"},
+      {"in": "5a6d383d", "out": [26223, 2], "nota": "Zm8= → fo"},
+      {"in": "5a6d3976", "out": [6713199, 3], "nota": "Zm9v → foo"},
+      {"in": "59673d3d", "out": [98, 1], "nota": "Yg== → b"},
+      {"in": "596d453d", "out": [25185, 2], "nota": "YmE= → ba"},
+      {"in": "596d4679", "out": [6447474, 3], "nota": "YmFy → bar"},
+      {"in": "5a3d3d3d", "out": null, "nota": "Z=== no es válido"},
+      {"in": "5a6d3d76", "out": null, "nota": "= en medio"},
+      {"in": "5a683d3d", "out": null, "nota": "Zh==: bits de relleno no nulos (§3.5, decisión: rechazar)"},
+      {"in": "5a6d39", "out": null, "nota": "menos de 4 caracteres"}
+    ]
+  },
+  "ipv4-header-check": {
+    "fuente": "RFC 791 §3.1 y RFC 1071; cabecera de ejemplo ampliamente citada (desviación: no está en el RFC)",
+    "salida": ["IHL u8", "longitud total u16"],
+    "casos": [
+      {"in": "450000730000400040 11b861c0a80001c0a800c7", "out": [5, 115]},
+      {"in": "450000730000400040 11b862c0a80001c0a800c7", "out": null, "nota": "suma incorrecta"},
+      {"in": "650000730000400040 11b861c0a80001c0a800c7", "out": null, "nota": "versión 6"},
+      {"in": "440000730000400040 11b861c0a80001c0a800c7", "out": null, "nota": "IHL < 5"},
+      {"in": "450000730000400040 11b861c0a80001c0a800", "out": null, "nota": "truncada"}
+    ]
+  },
+  "compactsize-decode": {
+    "fuente": "Referencia del protocolo de Bitcoin (CompactSize) y ReadCompactSize de Bitcoin Core (forma canónica)",
+    "salida": ["valor u64", "longitud u8"],
+    "casos": [
+      {"in": "00", "out": [0, 1]},
+      {"in": "fc", "out": [252, 1]},
+      {"in": "fdfd00", "out": [253, 3]},
+      {"in": "fdffff", "out": [65535, 3]},
+      {"in": "fe00000100", "out": [65536, 5]},
+      {"in": "feffffffff", "out": [4294967295, 5]},
+      {"in": "ff0000000001000000", "out": [4294967296, 9]},
+      {"in": "fdfc00", "out": null, "nota": "no canónica"},
+      {"in": "feffff0000", "out": null, "nota": "no canónica"},
+      {"in": "ffffffffff00000000", "out": null, "nota": "no canónica"},
+      {"in": "fd01", "out": null, "nota": "truncada"}
+    ]
+  },
+  "msgpack-int-decode": {
+    "fuente": "Especificación de MessagePack (formatos int); vectores derivados de la tabla de formatos (desviación: la especificación no trae vectores)",
+    "salida": ["64 bits u64", "con signo bool", "longitud u8"],
+    "casos": [
+      {"in": "00", "out": [0, false, 1]},
+      {"in": "7f", "out": [127, false, 1]},
+      {"in": "ff", "out": [18446744073709551615, true, 1], "nota": "-1"},
+      {"in": "e0", "out": [18446744073709551584, true, 1], "nota": "-32"},
+      {"in": "ccff", "out": [255, false, 2]},
+      {"in": "cd0100", "out": [256, false, 3]},
+      {"in": "ce00010000", "out": [65536, false, 5]},
+      {"in": "cf0000000000000001", "out": [1, false, 9]},
+      {"in": "d080", "out": [18446744073709551488, true, 2], "nota": "-128"},
+      {"in": "d07f", "out": [127, true, 2]},
+      {"in": "d1ff00", "out": [18446744073709551360, true, 3], "nota": "-256"},
+      {"in": "d2ffffffff", "out": [18446744073709551615, true, 5], "nota": "-1"},
+      {"in": "d38000000000000000", "out": [9223372036854775808, true, 9], "nota": "mínimo de int64"},
+      {"in": "c0", "out": null, "nota": "nil no es entero"},
+      {"in": "cc", "out": null, "nota": "truncada"}
+    ]
+  }
+}

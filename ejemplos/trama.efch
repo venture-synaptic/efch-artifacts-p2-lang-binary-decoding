@@ -1,0 +1,70 @@
+; Trama K7: formato binario inventado de EXP-003, fase 2 (requisito-base.md).
+; Misma semántica que experimentos/exp003/referencias/trama-base.efch, más un codificador para
+; generar la carga de medición y una línea base en C para el prototipo vertical de EFCH Lang.
+
+(efch 0.1
+
+  (computation trama-encode
+    (doc "Codifica tipo y valor como trama K7 mínima; con tipo 6 produce una trama que el decodificador rechaza.")
+    (input k (bv 8))
+    (input v (bv 64))
+    (output (bytes 12))
+    (semantics
+      (let ((kk (and k 7))
+            (n (first i 0 8 (ult v (shl (bv 64 1) (mul 8 i))) (bv 8 i) (bv 8 8))))
+        (let ((h (or #x40 (shl kk 3) (and n 7)))
+              (msk (ite (eq kk 7) #x5a (bv 8 0))))
+          (let ((cs (trunc 8 (urem (add (zext 16 h)
+                                        (reduce add j 1 9
+                                          (ite (ule (bv 8 j) n)
+                                               (zext 16 (xor (trunc 8 (lshr v (mul 8 (sub j 1)))) msk))
+                                               (bv 16 0))))
+                                   251))))
+            (mkbytes (add (zext 16 (and n 7)) 2) h
+              (each j 1 12
+                (ite (ule (bv 8 j) (and n 7))
+                     (xor (trunc 8 (lshr v (mul 8 (sub j 1)))) msk)
+                     (ite (eq (bv 8 j) (add (and n 7) 1)) cs (bv 8 0)))))))))
+    (budget (llm-calls 0) (smt-seconds 120)))
+
+  (computation trama-decode
+    (doc "Decodifica el prefijo de buf como una trama K7: cabecera, carga de n bytes y suma de control.")
+    (input buf (bytes 12))
+    (output (option (bv 64) (bv 8) (bv 8)))          ; valor, tipo, bytes consumidos
+    (semantics
+      (ite (ult (len buf) 2)
+           none
+           (let ((h (byte buf 0)))
+             (let ((ver (lshr h 6)) (k (and (lshr h 3) 7)) (n (and h 7)))
+               (ite (any (ne ver 1) (eq k 6) (ult (len buf) (add (zext 16 n) 2)))
+                    none
+                    (let ((suma (reduce add j 0 8 (ite (ule (bv 8 j) n) (zext 16 (byte buf j)) (bv 16 0))))
+                          (msk (ite (eq k 7) #x5a (bv 8 0))))
+                      (let ((v (reduce or i 1 8
+                                 (ite (ule (bv 8 i) n)
+                                      (shl (zext 64 (xor (byte buf i) msk)) (mul 8 (sub i 1)))
+                                      (bv 64 0)))))
+                        (ite (all (eq (trunc 8 (urem suma 251)) (byte buf (add (zext 16 n) 1)))
+                                  (any (eq n 0) (ne (xor (byte buf (zext 16 n)) msk) 0))
+                                  (any (ne k 0) (ult v 1000)))
+                             (some v (zext 8 k) (add n 2))
+                             none))))))))
+    (workload
+      (seeds 20261020 1 2)
+      (count 10000)
+      (input buf (mix (80 (via trama-encode (bits 3) (mix (40 (bits 8)) (30 (bits 24)) (30 (bits 56)))))
+                      (20 (random-bytes 0 12)))))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120)))
+
+  ; Ida y vuelta: todo valor < 2^56 (n tiene 3 bits: a lo sumo 7 bytes de carga) con tipo distinto de 6
+  ; (y valor < 1000 si el tipo es 0) se decodifica.
+  (property ida-y-vuelta
+    (forall ((k (bv 8)) (v (bv 64)))
+      (let ((kk (and k 7)))
+        (any (eq kk 6) (all (eq kk 0) (uge v 1000)) (uge v #x100000000000000)
+             (match (call trama-decode (call trama-encode k v))
+               ((some s w c) (all (eq s v) (eq w kk) (eq (zext 16 c) (len (call trama-encode k v)))))
+               (none false))))))
+
+  (baseline-c "trama.baseline.c"))

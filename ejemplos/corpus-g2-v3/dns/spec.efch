@@ -1,0 +1,58 @@
+; Nombre de host (RFC 1123 §2.1, RFC 952) en formato de cable DNS (RFC 1035 §3.1 y §4.1.4). EXP-009: los 32 pasos con fold (núcleo 0.2).
+(efch 0.1
+  (computation dns-ldh
+    (doc "Letra ASCII de cualquier caja, dígito o guion.")
+    (input c (bv 8))
+    (output bool)
+    (semantics (any (all (uge (or c #x20) #x61) (ule (or c #x20) #x7a))
+                    (all (uge c #x30) (ule c #x39))
+                    (eq c #x2d))))
+
+  (computation dns-label-ok
+    (doc "En p empieza una etiqueta válida: longitud 1–63, cabe en el búfer, LDH y sin guion en los extremos.")
+    (input b (bytes 64))
+    (input p (bv 16))
+    (output bool)
+    (semantics
+      (all (ult p (len b))
+           (uge (byte b p) 1)
+           (ule (byte b p) 63)
+           (ult (add p (zext 16 (byte b p))) (len b))
+           (ne (byte b (add p 1)) #x2d)
+           (ne (byte b (add p (zext 16 (byte b p)))) #x2d)
+           ; Índices absolutos constantes (EXP-008): j recorre 0..63 y solo se exige LDH dentro de la etiqueta.
+           (reduce all j 1 64
+             (any (ule (bv 16 j) p)
+                  (ugt (bv 16 j) (add p (zext 16 (byte b p))))
+                  (call dns-ldh (byte b (bv 16 j))))))))
+
+  (computation dns-step
+    (doc "Estado: etiquetas en el byte alto, posición en el bajo. Avanza una etiqueta si la hay; si no, queda fijo.")
+    (input b (bytes 64))
+    (input s (bv 16))
+    (output (bv 16))
+    (semantics
+      (let ((p (and s #xff)))
+        (ite (call dns-label-ok b p)
+             (or (shl (add (lshr s 8) 1) 8) (add p 1 (zext 16 (byte b p))))
+             s))))
+
+  (computation dns-hostname-wire
+    (doc "Pliega dns-step 32 veces: recorre como mucho 32 etiquetas desde 0 (cada una ocupa al menos 2 bytes de 64) y clasifica el octeto donde para: 0 = fin, 11xxxxxx = puntero, otro = error.")
+    (input b (bytes 64))
+    (output (option (bv 8) (bv 8) (bv 16)))          ; consumidos, etiquetas, puntero (FFFF si no hay)
+    (semantics
+      (let ((s32 (fold k 0 32 (s (bv 16 0)) (call dns-step b s))))
+        (let ((p (and s32 #xff)) (n (trunc 8 (lshr s32 8))))
+          (ite (uge p (len b))
+               none
+               (let ((l (byte b p)))
+                 (ite (eq l 0)
+                      (some (trunc 8 (add p 1)) n #xffff)
+                      (ite (all (eq (and l #xc0) #xc0) (ult (add p 1) (len b)))
+                           (some (trunc 8 (add p 2)) n
+                                 (or (shl (zext 16 (and l #x3f)) 8) (zext 16 (byte b (add p 1)))))
+                           none)))))))
+    (workload (seeds 20261021 1 2) (count 10000) (input b (random-bytes 1 64)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120))))

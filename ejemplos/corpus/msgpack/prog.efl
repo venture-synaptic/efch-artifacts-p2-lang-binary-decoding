@@ -1,0 +1,19 @@
+// Entero de MessagePack: fixint positivo y negativo, uint8..64 e int8..64. EXP-005.
+fn msgpack_int_decode(buf: bytes[9]) -> option(u64, bool, u8) implements msgpack-int-decode {
+    if buf.len == 0 { return none }
+    let tag = buf[0]
+    if tag < 0x80 { return some(tag, false, 1) }
+    if tag >= 0xe0 { return some(0xffffffffffffff00 | u64(tag), true, 1) }
+    if tag < 0xcc || tag > 0xd3 { return none }
+    let signed = tag >= 0xd0
+    let n = 1 << (tag & 3)
+    if buf.len < n + 1 { return none }
+    var u: u64 = 0
+    for i in 1..=n {
+        u = u << 8 | buf[i]
+    }
+    if signed && buf[1] >= 0x80 {
+        u |= u64(0xffffffffffffffff) << (8 * n)
+    }
+    return some(u, signed, n + 1)
+}

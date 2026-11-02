@@ -1,0 +1,81 @@
+; Cabecera IPv4 con opciones (RFC 791 §3.1; suma de control RFC 1071; Router Alert RFC 2113). EXP-015.
+; Estado del recorrido de opciones en 64 bits: posición (bits 0–7), fin (8), error (9), encaminamiento en origen
+; visto (10), Router Alert vista (11), número de opciones (16–23), valor de la Router Alert (32–47).
+(efch 0.1
+  (computation ip-hl
+    (doc "Longitud de la cabecera en bytes (4 · IHL); 0 si el búfer está vacío.")
+    (input b (bytes 60))
+    (output (bv 16))
+    (semantics (ite (ult (len b) 1) (bv 16 0) (mul 4 (zext 16 (and (byte b 0) #x0f))))))
+
+  (computation ip-sum
+    (doc "Suma de las palabras de 16 bits big-endian de b[0..hl), sin plegar el acarreo (como mucho 30 · FFFF).")
+    (input b (bytes 60))
+    (output (bv 32))
+    (semantics
+      (fold k 0 30 (s (bv 32 0))
+        (let ((hl (call ip-hl b)))
+          (ite (all (ult (add (mul (bv 16 2) (bv 16 k)) 1) hl) (ule hl (len b)))
+               (add s (zext 32 (or (shl (zext 16 (byte b (mul (bv 16 2) (bv 16 k)))) 8)
+                                   (zext 16 (byte b (add (mul (bv 16 2) (bv 16 k)) 1))))))
+               s)))))
+
+  (computation ip-step
+    (doc "Avanza una opción. Si el recorrido terminó (fin, error o p ≥ hl) o la cabecera no cabe, no cambia nada.")
+    (input b (bytes 60))
+    (input s (bv 64))
+    (output (bv 64))
+    (semantics
+      (let ((hl (call ip-hl b))
+            (p (trunc 16 (and s #xff)))
+            (err (or s #x200)))
+        (ite (any (ne (and s #x300) 0) (uge p hl) (ugt hl (len b)))
+             s
+             (let ((k (byte b p)))
+               (ite (eq k 0)
+                    (or s #x100)
+                    (ite (eq k 1)
+                         (add s 1)
+                         (ite (uge (add p 1) hl)
+                              err
+                              (let ((l (byte b (add p 1))))
+                                (ite (any (ult l 2) (ugt (add p (zext 16 l)) hl))
+                                     err
+                                     (let ((base (add (or (and s #xffffffffffffff00) (zext 64 (add p (zext 16 l))))
+                                                      #x10000)))
+                                       (ite (any (eq k 131) (eq k 137))
+                                            (ite (any (ult l 3) (ne (and s #x400) 0)) err (or base #x400))
+                                            (ite (eq k 148)
+                                                 (ite (any (ne l 4) (ne (and s #x800) 0))
+                                                      err
+                                                      (or base #x800
+                                                          (shl (zext 64 (byte b (add p 2))) 40)
+                                                          (shl (zext 64 (byte b (add p 3))) 32)))
+                                                 base)))))))))))))
+
+  (computation ipv4-header
+    (doc "Valida versión, IHL, longitud total y suma de control, y recorre como mucho 40 opciones desde el byte 20.")
+    (input b (bytes 60))
+    (output (option (bv 8) (bv 8) bool (bv 16)))       ; hl, número de opciones, encaminamiento en origen, Router Alert (FFFF si no hay)
+    (semantics
+      (ite (ult (len b) 20)
+           none
+           (let ((ihl (and (byte b 0) #x0f)) (hl (call ip-hl b))
+                 (total (or (shl (zext 16 (byte b 2)) 8) (zext 16 (byte b 3)))))
+             (ite (any (ne (lshr (byte b 0) 4) 4) (ult ihl 5) (ugt hl (len b)) (ult total hl))
+                  none
+                  (let ((s1 (call ip-sum b)))
+                    (let ((c1 (add (and s1 #xffff) (lshr s1 16))))
+                      (let ((c2 (add (and c1 #xffff) (lshr c1 16))))
+                        (ite (ne c2 #xffff)
+                             none
+                             (let ((s (fold k 0 40 (st (bv 64 20)) (call ip-step b st))))
+                               (ite (ne (and s #x200) 0)
+                                    none
+                                    (some (trunc 8 hl)
+                                          (trunc 8 (lshr s 16))
+                                          (ne (and s #x400) 0)
+                                          (ite (eq (and s #x800) 0) #xffff (trunc 16 (lshr s 32))))))))))))))
+    (workload (seeds 20261024 1 2) (count 10000) (input b (random-bytes 1 60)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120))))

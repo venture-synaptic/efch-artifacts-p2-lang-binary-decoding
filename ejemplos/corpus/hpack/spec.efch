@@ -1,0 +1,28 @@
+; Entero de HPACK con prefijo de N bits (RFC 7541, §5.1). EXP-005.
+; Simplificación declarada: valor ≤ 2^32-1 y como mucho 6 bytes (prefijo + 5 de continuación).
+(efch 0.1
+  (computation hpack-int-decode
+    (doc "Si el prefijo no está lleno, es el valor; si lo está, se suman grupos de 7 bits en little-endian hasta un byte < 0x80.")
+    (input n (bv 8))                                 ; bits del prefijo, 1..8
+    (input buf (bytes 6))
+    (output (option (bv 32) (bv 8)))                 ; valor, bytes consumidos
+    (semantics
+      (ite (any (eq n 0) (ugt n 8) (eq (len buf) 0))
+           none
+           (let ((mask (trunc 8 (sub (shl (bv 16 1) (zext 16 n)) 1))))
+             (let ((p (and (byte buf 0) mask)))
+               (ite (ult p mask)
+                    (some (zext 32 p) 1)
+                    (first t 1 6
+                      (all (ult t (len buf)) (ult (byte buf t) #x80))
+                      (let ((v (add (zext 64 mask)
+                                    (reduce add j 1 (add t 1)
+                                      (shl (zext 64 (and (byte buf j) #x7f)) (mul 7 (sub j 1)))))))
+                        (ite (ugt v #xffffffff) none (some (trunc 32 v) (add t 1))))
+                      none))))))
+    (workload (seeds 20261020 1 2) (count 10000)
+      (input n (bits 3))
+      (input buf (random-bytes 1 6)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120)))
+  (baseline-c "baseline.c"))

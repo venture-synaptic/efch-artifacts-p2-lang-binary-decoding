@@ -1,0 +1,43 @@
+// Nombre de host (RFC 1123 §2.1, RFC 952) en formato de cable DNS (RFC 1035 §3.1 y §4.1.4). EXP-007.
+// Primera versión (rodeo pendiente): el traductor 0.1 agota la memoria al fusionar los if anidados. Se conserva como evidencia de EXP-007.
+fn ldh(c: u8) -> bool {
+    return c | 0x20 >= 0x61 && c | 0x20 <= 0x7a || c >= 0x30 && c <= 0x39 || c == 0x2d
+}
+
+fn dns_hostname_wire(b: bytes[64]) -> option(u8, u8, u16) implements dns-hostname-wire {
+    var state: u8 = 0          // 0: recorriendo, 1: aceptado, 2: rechazado
+    var pos: u16 = 0           // próximo octeto de longitud
+    var start: u16 = 0         // octeto de longitud de la etiqueta en curso
+    var labels: u8 = 0
+    var end: u16 = 0
+    var ptr: u16 = 0xffff
+    for i in 0..b.len {
+        let c = b[i]
+        if state == 0 {
+            if i == pos {
+                if c == 0 {
+                    state = 1
+                    end = pos + 1
+                } else if c & 0xc0 == 0xc0 {
+                    if i + 1 < b.len {
+                        state = 1
+                        end = pos + 2
+                        ptr = u16(c & 0x3f) << 8 | b[i + 1]
+                    } else {
+                        state = 2
+                    }
+                } else if c >= 0x40 || i + c >= b.len {
+                    state = 2
+                } else {
+                    labels += 1
+                    start = i
+                    pos = i + 1 + c
+                }
+            } else if !ldh(c) || c == 0x2d && (i == start + 1 || i + 1 == pos) {
+                state = 2
+            }
+        }
+    }
+    if state == 1 { return some(end as u8, labels, ptr) }
+    return none
+}

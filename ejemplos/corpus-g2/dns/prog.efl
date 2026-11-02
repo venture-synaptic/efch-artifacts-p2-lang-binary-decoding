@@ -1,0 +1,31 @@
+// Nombre de host (RFC 1123 §2.1, RFC 952) en formato de cable DNS (RFC 1035 §3.1 y §4.1.4). EXP-007.
+// Rodeo: el estado se actualiza con if de expresión; con if de sentencias anidados, el traductor 0.1
+// duplica cada rama por variable asignada (ver prog-v1-sentencias.efl).
+fn ldh(c: u8) -> bool {
+    return c | 0x20 >= 0x61 && c | 0x20 <= 0x7a || c >= 0x30 && c <= 0x39 || c == 0x2d
+}
+
+fn dns_hostname_wire(b: bytes[64]) -> option(u8, u8, u16) implements dns-hostname-wire {
+    var state: u8 = 0          // 0: recorriendo, 1: aceptado, 2: rechazado
+    var pos: u16 = 0           // próximo octeto de longitud
+    var start: u16 = 0         // octeto de longitud de la etiqueta en curso
+    var labels: u8 = 0
+    var end: u16 = 0
+    var ptr: u16 = 0xffff
+    for i in 0..b.len {
+        let c = b[i]
+        let at = state == 0 && i == pos
+        let is_end = at && c == 0
+        let is_ptr = at && c & 0xc0 == 0xc0 && i + 1 < b.len
+        let is_label = at && c != 0 && c < 0x40 && i + c < b.len
+        let bad_char = state == 0 && i != pos && (!ldh(c) || c == 0x2d && (i == start + 1 || i + 1 == pos))
+        end = if is_end { i + 1 } else if is_ptr { i + 2 } else { end }
+        ptr = if is_ptr { u16(c & 0x3f) << 8 | b[i + 1] } else { ptr }
+        labels = if is_label { labels + 1 } else { labels }
+        start = if is_label { i } else { start }
+        pos = if is_label { i + 1 + c } else { pos }
+        state = if is_end || is_ptr { 1 } else if bad_char || at && !is_label { 2 } else { state }
+    }
+    if state == 1 { return some(end as u8, labels, ptr) }
+    return none
+}

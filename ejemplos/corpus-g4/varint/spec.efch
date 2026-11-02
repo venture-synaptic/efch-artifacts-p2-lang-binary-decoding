@@ -1,0 +1,16 @@
+; Varint sin signo de Protocol Buffers con la semántica de Go encoding/binary.Uvarint. EXP-015.
+; El primer byte con el bit alto a 0 termina; en el décimo, un valor mayor que 1 desborda. No se exige la forma mínima.
+(efch 0.1
+  (computation varint-u64
+    (input b (bytes 16))
+    (output (option (bv 64) (bv 8)))                   ; valor, bytes consumidos
+    (semantics
+      (first k 0 10 (all (ult (bv 16 k) (len b)) (ult (byte b (bv 16 k)) #x80))
+        (ite (all (eq (bv 8 k) 9) (ugt (byte b (bv 16 9)) 1))
+             none
+             (some (reduce or j 0 (add k 1) (shl (zext 64 (and (byte b (bv 16 j)) #x7f)) (mul (bv 64 7) (bv 64 j))))
+                   (add (bv 8 k) 1)))
+        none))
+    (workload (seeds 20261024 1 2) (count 10000) (input b (random-bytes 0 16)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120))))

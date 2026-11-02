@@ -1,0 +1,63 @@
+; EXP-002, Revisión 1: definición de EXP-001.
+; Generado a partir de ejemplos/varint.efch; solo cambian varint-decode y sus propiedades.
+
+(efch 0.1
+
+  (computation varint-encode
+    (doc "Codifica un entero de 64 bits en 1 a 10 bytes LEB128 canónicos.")
+    (input x (bv 64))
+    (output (bytes 10))
+    (semantics
+      ; n = número de grupos de 7 bits: el menor k en 1..9 con x < 2^(7k), si no 10.
+      (let ((n (first k 1 10 (ult x (shl (bv 64 1) (mul 7 k))) (bv 16 k) (bv 16 10))))
+        (mkbytes n
+          (each k 0 10
+            (or (and (trunc 8 (lshr x (mul 7 k))) #x7f)
+                (ite (ult k (sub n 1)) #x80 0))))))
+    (workload
+      (seeds 20261020 1 2)
+      (count 10000)
+      (input x (mix (50 (bits 7)) (25 (bits 14)) (15 (bits 32)) (10 (bits 64)))))
+    (objective (minimize time))
+    (budget (llm-calls 4) (llm-usd 1.5) (smt-seconds 120)))
+
+  (computation varint-decode
+    (doc "Revisión 1: definición de EXP-001.")
+    (input buf (bytes 11))
+    (output (option (bv 64) (bv 8)))
+    (semantics
+      (first t 0 10
+        (all (ult t (len buf)) (ult (byte buf t) #x80))
+        (let ((v (reduce or j 0 (add t 1)
+                   (shl (zext 70 (and (byte buf j) #x7f)) (mul 7 j)))))
+          (ite (all (ugt t 0) (eq (byte buf t) 0))
+               none
+               (ite (ugt v #xffffffffffffffff)
+                    none
+                    (some (trunc 64 v) (add t 1)))))
+        none)
+    )
+    (workload
+      (seeds 20261020 1 2)
+      (count 10000)
+      (input buf (via varint-encode (mix (50 (bits 7)) (25 (bits 14)) (15 (bits 32)) (10 (bits 64))))))
+    (objective (minimize time))
+    (budget (llm-calls 4) (llm-usd 1.5) (smt-seconds 120)))
+
+  (property ida-y-vuelta
+    (forall ((x (bv 64)))
+      (let ((e (call varint-encode x)))
+        (match (call varint-decode e)
+          ((some v n) (all (eq v x) (eq (zext 16 n) (len e))))
+          (none false)))))
+
+  (property decodificacion-canonica
+    (forall ((buf (bytes 11)))
+      (match (call varint-decode buf)
+        ((some v n)
+          (let ((e (call varint-encode v)))
+            (all (eq (zext 16 n) (len e))
+                 (reduce all k 0 10
+                   (any (uge k (len e)) (eq (byte e k) (byte buf k)))))))
+        (none true))))
+)

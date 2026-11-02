@@ -1,0 +1,23 @@
+// Trama K7 en EFCH Lang 0.1. Especificación: ejemplos/trama.efch (computation trama-decode).
+// Cabecera: versión (2 bits) | tipo (3) | n (3); carga de n bytes, little-endian, con XOR 0x5A
+// si el tipo es 7; suma de control = (cabecera + bytes de carga transmitidos) mod 251.
+
+fn trama_decode(buf: bytes[12]) -> option(u64, u8, u8) implements trama-decode {
+    if buf.len < 2 { return none }
+    let h = buf[0]
+    let k = (h >> 3) & 7
+    let n = h & 7
+    if h >> 6 != 1 || k == 6 || buf.len < n + 2 { return none }
+
+    let mask: u8 = if k == 7 { 0x5a } else { 0 }
+    var sum: u16 = h
+    var v: u64 = 0
+    for i in 1..=n {
+        sum += buf[i]
+        v |= u64(buf[i] ^ mask) << (8 * (i - 1))
+    }
+    if buf[n + 1] != sum % 251 { return none }       // suma de control
+    if n > 0 && buf[n] ^ mask == 0 { return none }   // carga no mínima
+    if k == 0 && v >= 1000 { return none }           // el tipo 0 solo admite valores < 1000
+    return some(v, k, n + 2)
+}

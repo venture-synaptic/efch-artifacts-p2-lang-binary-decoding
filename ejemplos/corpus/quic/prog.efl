@@ -1,0 +1,11 @@
+// Entero de longitud variable de QUIC (RFC 9000, §16). EXP-005.
+fn quic_varint_decode(buf: bytes[8]) -> option(u64, u8) implements quic-varint-decode {
+    if buf.len == 0 { return none }
+    let n = 1 << (buf[0] >> 6)
+    if buf.len < n { return none }
+    var v: u64 = buf[0] & 0x3f
+    for i in 1..n {
+        v = v << 8 | buf[i]
+    }
+    return some(v, n)
+}

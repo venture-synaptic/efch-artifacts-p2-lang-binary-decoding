@@ -1,0 +1,9 @@
+EFCH Lang research artifacts (EXP-004 to EXP-015)
+Copyright 2026 Erik Fisher Cueva Huari (VentureSynaptic Labs)
+
+Source code (efch/, experimentos/, scripts/, tests/, ejemplos/) is licensed under the Apache License,
+Version 2.0 (LICENSE). Data, manuscript and documents (data/, docs/, paper/, README files) are
+licensed under Creative Commons Attribution 4.0 International (LICENSE-CC-BY-4.0).
+
+Z3, Kani, Dafny, CBMC, Rust and Go are not included; the vendor scripts download them under their
+own licenses.

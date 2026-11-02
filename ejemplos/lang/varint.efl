@@ -1,0 +1,17 @@
+// Decodificador LEB128 canónico de 64 bits, en EFCH Lang 0.1.
+// Especificación: ejemplos/varint.efch (computation varint-decode).
+
+fn varint_decode(buf: bytes[11]) -> option(u64, u8) implements varint-decode {
+    var result: u64 = 0
+    for i in 0..min(buf.len, 10) {
+        let b = buf[i]
+        result |= u64(b & 0x7f) << (7 * i)
+        if b < 0x80 {
+            if (i > 0 && b == 0) || (i == 9 && b > 1) {
+                return none          // no canónica o no cabe en 64 bits
+            }
+            return some(result, i + 1)
+        }
+    }
+    return none                      // truncada o demasiado larga
+}

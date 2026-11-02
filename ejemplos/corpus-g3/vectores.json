@@ -1,0 +1,183 @@
+{
+ "tcp-options": {
+  "fuente": "RFC 9293 §3.1 y §3.2; RFC 7323 §2.2–2.3; RFC 2018 §2. Todos los casos son derivados de las reglas de docs/experimentos/EXP-010.md",
+  "salida": "option(hl u8, mss u16, ws u8, sack bool)",
+  "casos": [
+   {
+    "in": "01bbc35000000001000000005012ffff00000000",
+    "out": [
+     20,
+     65535,
+     255,
+     false
+    ],
+    "nota": "derivado: sin opciones (doff = 5)"
+   },
+   {
+    "in": "01bbc35000000001000000005012ffff000000",
+    "out": null,
+    "nota": "derivado: menos de 20 bytes"
+   },
+   {
+    "in": "01bbc35000000001000000004012ffff00000000",
+    "out": null,
+    "nota": "derivado: doff < 5"
+   },
+   {
+    "in": "01bbc35000000001000000006012ffff00000000020405",
+    "out": null,
+    "nota": "derivado: hl mayor que el búfer"
+   },
+   {
+    "in": "01bbc35000000001000000006012ffff00000000020405b4",
+    "out": [
+     24,
+     1460,
+     255,
+     false
+    ],
+    "nota": "derivado: MSS 1460"
+   },
+   {
+    "in": "01bbc35000000001000000008012ffff00000000020405b40103030704020101",
+    "out": [
+     32,
+     1460,
+     7,
+     true
+    ],
+    "nota": "derivado: MSS, NOP, escala 7, SACK permitido"
+   },
+   {
+    "in": "01bbc35000000001000000006012ffff0000000003030f00",
+    "out": [
+     24,
+     65535,
+     14,
+     false
+    ],
+    "nota": "derivado: escala 15 → 14 (RFC 7323 §2.3)"
+   },
+   {
+    "in": "01bbc35000000001000000006012ffff000000000303ff00",
+    "out": [
+     24,
+     65535,
+     14,
+     false
+    ],
+    "nota": "derivado: escala 255 → 14"
+   },
+   {
+    "in": "01bbc35000000001000000008012ffff000000000101080a0000000100000000",
+    "out": [
+     32,
+     65535,
+     255,
+     false
+    ],
+    "nota": "derivado: NOP, NOP, marca de tiempo (se salta)"
+   },
+   {
+    "in": "01bbc35000000001000000007012ffff0000000000020405b4000000",
+    "out": [
+     28,
+     65535,
+     255,
+     false
+    ],
+    "nota": "derivado: EOL: lo siguiente no se lee"
+   },
+   {
+    "in": "01bbc35000000001000000007012ffff00000000020405b402040218",
+    "out": null,
+    "nota": "derivado: MSS duplicado"
+   },
+   {
+    "in": "01bbc35000000001000000007012ffff000000000303010303020000",
+    "out": null,
+    "nota": "derivado: escala duplicada"
+   },
+   {
+    "in": "01bbc35000000001000000006012ffff0000000004020402",
+    "out": null,
+    "nota": "derivado: SACK permitido duplicado"
+   },
+   {
+    "in": "01bbc35000000001000000007012ffff00000000020505b400000000",
+    "out": null,
+    "nota": "derivado: MSS con L = 5"
+   },
+   {
+    "in": "01bbc35000000001000000006012ffff0000000003020000",
+    "out": null,
+    "nota": "derivado: escala con L = 2"
+   },
+   {
+    "in": "01bbc35000000001000000006012ffff0000000004030000",
+    "out": null,
+    "nota": "derivado: SACK permitido con L = 3"
+   },
+   {
+    "in": "01bbc35000000001000000006012ffff0000000008010000",
+    "out": null,
+    "nota": "derivado: longitud 1 (< 2)"
+   },
+   {
+    "in": "01bbc35000000001000000006012ffff0000000008000000",
+    "out": null,
+    "nota": "derivado: longitud 0"
+   },
+   {
+    "in": "01bbc35000000001000000006012ffff0000000001010108",
+    "out": null,
+    "nota": "derivado: tipo al final sin byte de longitud"
+   },
+   {
+    "in": "01bbc35000000001000000008012ffff00000000050a00000001000000020000",
+    "out": [
+     32,
+     65535,
+     255,
+     false
+    ],
+    "nota": "derivado: SACK (tipo 5) de 10 bytes, se salta"
+   },
+   {
+    "in": "01bbc35000000001000000007012ffff00000000080b00000000000000000000",
+    "out": null,
+    "nota": "derivado: opción que se sale de hl (20 + 11 > 28)"
+   },
+   {
+    "in": "01bbc3500000000100000000f012ffff0000000001010101010101010101010101010101010101010101010101010101010101010101010101010101",
+    "out": [
+     60,
+     65535,
+     255,
+     false
+    ],
+    "nota": "derivado: 40 NOP (máximo de opciones)"
+   },
+   {
+    "in": "01bbc35000000001000000006012ffff00000000020405b4dead",
+    "out": [
+     24,
+     1460,
+     255,
+     false
+    ],
+    "nota": "derivado: datos tras la cabecera (se ignoran)"
+   },
+   {
+    "in": "01bbc35000000001000000007012ffff000000000204000003030001",
+    "out": [
+     28,
+     0,
+     0,
+     false
+    ],
+    "nota": "derivado: MSS 0 y escala 0"
+   }
+  ]
+ }
+}

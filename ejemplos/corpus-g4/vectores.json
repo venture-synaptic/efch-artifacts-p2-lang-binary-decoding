@@ -1,0 +1,919 @@
+{
+  "ipv4-header": [
+    {
+      "entrada": "450000140001000040118ea1c0000201c6336402",
+      "esperado": [
+        20,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: cabecera mínima, IHL=5, total=20"
+    },
+    {
+      "entrada": "4500ffff0001000040118eb5c0000201c6336402",
+      "esperado": [
+        20,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: total máximo; no se exige recibir el payload"
+    },
+    {
+      "entrada": "450000150001000040118ea0c0000201c6336402",
+      "esperado": [
+        20,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: total mayor que los bytes recibidos"
+    },
+    {
+      "entrada": "45000014000100000011cea1c0000201c6336402",
+      "esperado": [
+        20,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: TTL cero no está excluido por la ficha"
+    },
+    {
+      "entrada": "450000140001ffff40118ea1c0000201c6336402",
+      "esperado": [
+        20,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: flags y fragment offset no restringidos por la ficha"
+    },
+    {
+      "entrada": "450000140001000040117ad9ffffffffffffffff",
+      "esperado": [
+        20,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: direcciones con palabras 0xffff; acarreo en checksum"
+    },
+    {
+      "entrada": "450000140001000040118ea1c0000201c633640294048389",
+      "esperado": [
+        20,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: bytes posteriores a hl no son opciones ni entran en checksum"
+    },
+    {
+      "entrada": "450000140001000040118ea1c0000201c6336402ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "esperado": [
+        20,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: entrada máxima de 60 bytes con hl=20"
+    },
+    {
+      "entrada": "",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: entrada vacía"
+    },
+    {
+      "entrada": "45",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: entrada de un byte"
+    },
+    {
+      "entrada": "450000140001000040118ea1c0000201c63364",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: cabecera truncada a 19 bytes"
+    },
+    {
+      "entrada": "440000140001000040118fa1c0000201c6336402",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: IHL=4, menor que cinco, con checksum correcto sobre los 20 bytes"
+    },
+    {
+      "entrada": "4000001400010000401193a1c0000201c6336402",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: IHL=0"
+    },
+    {
+      "entrada": "650000140001000040116ea1c0000201c6336402",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: versión 6"
+    },
+    {
+      "entrada": "05000014000100004011cea1c0000201c6336402",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: versión 0"
+    },
+    {
+      "entrada": "f5000014000100004011dea0c0000201c6336402",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: versión 15"
+    },
+    {
+      "entrada": "460000140001000040118da1c0000201c6336402",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: IHL=6 pero solo 20 bytes disponibles"
+    },
+    {
+      "entrada": "4f00003c0001000040117065c0000201c6336402010101010101010101010101010101010101010101010101010101010101010101010101010101",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: IHL=15 pero falta el último byte"
+    },
+    {
+      "entrada": "450000130001000040118ea2c0000201c6336402",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: longitud total menor que hl=20"
+    },
+    {
+      "entrada": "450000000001000040118eb5c0000201c6336402",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: longitud total cero"
+    },
+    {
+      "entrada": "460000170001000040118b9cc0000201c633640201010101",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: longitud total 23 menor que hl=24"
+    },
+    {
+      "entrada": "450000140001000041118ea1c0000201c6336402",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: bit alterado en TTL sin recalcular checksum"
+    },
+    {
+      "entrada": "450000140001000040110000c0000201c6336402",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: checksum anulado, suma incorrecta"
+    },
+    {
+      "entrada": "45000014000100004011a18ec0000201c6336402",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: checksum con bytes invertidos; orden big-endian"
+    },
+    {
+      "entrada": "460000180001000040118d9dc0000201c633640200000000",
+      "esperado": [
+        24,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: EOL y relleno cero"
+    },
+    {
+      "entrada": "460000180001000040118b1bc0000201c6336402008301ff",
+      "esperado": [
+        24,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: EOL antes del final ignora una opción malformada posterior"
+    },
+    {
+      "entrada": "460000180001000040118b9bc0000201c633640201010101",
+      "esperado": [
+        24,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: cuatro NOP; nopts=0"
+    },
+    {
+      "entrada": "46000018000100004011099dc0000201c633640201008300",
+      "esperado": [
+        24,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: NOP seguido de EOL; resto ignorado"
+    },
+    {
+      "entrada": "460000180001000040118b1ac0000201c633640201010182",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: tipo genérico en último byte, falta longitud"
+    },
+    {
+      "entrada": "460000180001000040118b08c0000201c633640201010194",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: Router Alert en último byte, falta longitud"
+    },
+    {
+      "entrada": "460000180001000040110b98c0000201c633640282050000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: opción genérica excede hl"
+    },
+    {
+      "entrada": "460000180001000040110b9dc0000201c633640282000000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: opción genérica L=0"
+    },
+    {
+      "entrada": "460000180001000040110b9cc0000201c633640282010000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: opción genérica L=1"
+    },
+    {
+      "entrada": "460000180001000040110b9bc0000201c633640282020000",
+      "esperado": [
+        24,
+        1,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: opción genérica L=2 seguida de EOL"
+    },
+    {
+      "entrada": "460000180001000040115fcbc0000201c63364028204abcd",
+      "esperado": [
+        24,
+        1,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: opción genérica termina exactamente en hl"
+    },
+    {
+      "entrada": "460000180001000040118998c0000201c633640282028202",
+      "esperado": [
+        24,
+        2,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: dos opciones genéricas cuentan dos apariciones"
+    },
+    {
+      "entrada": "460000180001000040110a99c0000201c633640282030101",
+      "esperado": [
+        24,
+        1,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: opción genérica L=3 seguida de NOP"
+    },
+    {
+      "entrada": "46000018000100004011069ac0000201c633640283030400",
+      "esperado": [
+        24,
+        1,
+        1,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: LSRR mínima L=3, puntero 4"
+    },
+    {
+      "entrada": "46000018000100004011009ac0000201c633640289030400",
+      "esperado": [
+        24,
+        1,
+        1,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: SSRR mínima L=3, puntero 4"
+    },
+    {
+      "entrada": "460000180001000040110a9ac0000201c633640283030000",
+      "esperado": [
+        24,
+        1,
+        1,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: la ficha no restringe puntero LSRR cero"
+    },
+    {
+      "entrada": "460000180001000040110599c0000201c63364028903ff00",
+      "esperado": [
+        24,
+        1,
+        1,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: la ficha no restringe puntero SSRR 255"
+    },
+    {
+      "entrada": "460000180001000040110a9bc0000201c633640283020000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: LSRR L=2, falta puntero"
+    },
+    {
+      "entrada": "46000018000100004011049bc0000201c633640289020000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: SSRR L=2, falta puntero"
+    },
+    {
+      "entrada": "4700001c00010000401103d0c0000201c6336402830704c000020100",
+      "esperado": [
+        28,
+        1,
+        1,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: LSRR con dirección IPv4 y EOL"
+    },
+    {
+      "entrada": "4700001c0001000040110209c0000201c63364028303048903040000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: LSRR seguida de SSRR; dos rutas en origen"
+    },
+    {
+      "entrada": "4700001c000100004011fc0ec0000201c63364028903048303040000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: SSRR seguida de LSRR; dos rutas en origen"
+    },
+    {
+      "entrada": "4700001c000100004011020fc0000201c63364028303048303040000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: dos LSRR"
+    },
+    {
+      "entrada": "4700001c000100004011fc08c0000201c63364028903048903040000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: dos SSRR"
+    },
+    {
+      "entrada": "46000018000100004011f998c0000201c633640294040000",
+      "esperado": [
+        24,
+        1,
+        0,
+        0
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: RFC 2113: Router Alert L=4, valor cero"
+    },
+    {
+      "entrada": "46000018000100004011e764c0000201c633640294041234",
+      "esperado": [
+        24,
+        1,
+        0,
+        4660
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: RFC 2113: valor Router Alert big-endian 0x1234, admitido por la ficha"
+    },
+    {
+      "entrada": "46000018000100004011f998c0000201c63364029404ffff",
+      "esperado": [
+        24,
+        1,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: RFC 2113: valor 0xffff, admitido por la ficha; nopts distingue ausencia"
+    },
+    {
+      "entrada": "4700001c000100004011648dc0000201c63364029404000194040002",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: RFC 2113 y ficha: dos Router Alert"
+    },
+    {
+      "entrada": "4700001c0001000040116490c0000201c63364029404ffff94040000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: segunda Router Alert tras valor 0xffff sigue siendo duplicada"
+    },
+    {
+      "entrada": "46000018000100004011f99ac0000201c633640294020000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: Router Alert L=2"
+    },
+    {
+      "entrada": "46000018000100004011f999c0000201c633640294030000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: Router Alert L=3"
+    },
+    {
+      "entrada": "4700001c000100004011f893c0000201c63364029405000000000000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: Router Alert L=5 disponible pero no permitida"
+    },
+    {
+      "entrada": "460000180001000040118809c0000201c633640201940400",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: Router Alert L=4 truncada por hl"
+    },
+    {
+      "entrada": "4700001c000100004011c5c2c0000201c6336402830304019404abcd",
+      "esperado": [
+        28,
+        2,
+        1,
+        43981
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: LSRR, NOP y Router Alert"
+    },
+    {
+      "entrada": "4700001c0001000040116b90c0000201c63364029404000189030400",
+      "esperado": [
+        28,
+        2,
+        1,
+        1
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: Router Alert, SSRR y EOL"
+    },
+    {
+      "entrada": "4700001c000100004011f3ffc0000201c63364029404000000940401",
+      "esperado": [
+        28,
+        1,
+        0,
+        0
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: EOL impide recorrer una segunda Router Alert truncada"
+    },
+    {
+      "entrada": "4700001c0001000040117892c0000201c63364028303040089030400",
+      "esperado": [
+        28,
+        1,
+        1,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: EOL impide recorrer una segunda ruta en origen"
+    },
+    {
+      "entrada": "4f00003c0001000040117065c0000201c633640201010101010101010101010101010101010101010101010101010101010101010101010101010101",
+      "esperado": [
+        60,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: cabecera máxima 60 bytes con 40 NOP"
+    },
+    {
+      "entrada": "4f00003c0001000040115c47c0000201c633640282028202820282028202820282028202820282028202820282028202820282028202820282028202",
+      "esperado": [
+        60,
+        20,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: cabecera máxima, veinte opciones de dos bytes"
+    },
+    {
+      "entrada": "4f00003c0001000040110251c0000201c63364028228ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "esperado": [
+        60,
+        1,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: opción genérica de 40 bytes; múltiples acarreos checksum"
+    },
+    {
+      "entrada": "4f00003c000100004011837ac0000201c633640200ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "esperado": [
+        60,
+        0,
+        0,
+        65535
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: EOL inmediato; relleno no cero cubierto por checksum"
+    },
+    {
+      "entrada": "4f00003c0001000040116fe4c0000201c633640201010101010101010101010101010101010101010101010101010101010101010101010101010182",
+      "esperado": null,
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: cabecera de 60 bytes: opción sin longitud en byte final"
+    },
+    {
+      "entrada": "4f00003c000100004011dd62c0000201c633640201010101010101010101010101010101010101010101010101010101010101010101010194040100",
+      "esperado": [
+        60,
+        1,
+        0,
+        256
+      ],
+      "fuente": "Derivado de memoria de RFC 791/1071 y EXP-015, Funciones: Router Alert termina exactamente en byte 60"
+    }
+  ],
+  "varint-u64": [
+    {
+      "entrada": "00",
+      "esperado": [
+        0,
+        1
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 0, consume 1 bytes"
+    },
+    {
+      "entrada": "01",
+      "esperado": [
+        1,
+        1
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 1, consume 1 bytes"
+    },
+    {
+      "entrada": "02",
+      "esperado": [
+        2,
+        1
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 2, consume 1 bytes"
+    },
+    {
+      "entrada": "3f",
+      "esperado": [
+        63,
+        1
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 63, consume 1 bytes"
+    },
+    {
+      "entrada": "40",
+      "esperado": [
+        64,
+        1
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 64, consume 1 bytes"
+    },
+    {
+      "entrada": "7e",
+      "esperado": [
+        126,
+        1
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 126, consume 1 bytes"
+    },
+    {
+      "entrada": "7f",
+      "esperado": [
+        127,
+        1
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 127, consume 1 bytes"
+    },
+    {
+      "entrada": "8001",
+      "esperado": [
+        128,
+        2
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 128, consume 2 bytes"
+    },
+    {
+      "entrada": "8101",
+      "esperado": [
+        129,
+        2
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 129, consume 2 bytes"
+    },
+    {
+      "entrada": "ac02",
+      "esperado": [
+        300,
+        2
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 300, consume 2 bytes"
+    },
+    {
+      "entrada": "ff01",
+      "esperado": [
+        255,
+        2
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 255, consume 2 bytes"
+    },
+    {
+      "entrada": "8002",
+      "esperado": [
+        256,
+        2
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 256, consume 2 bytes"
+    },
+    {
+      "entrada": "ff7f",
+      "esperado": [
+        16383,
+        2
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 16383, consume 2 bytes"
+    },
+    {
+      "entrada": "808001",
+      "esperado": [
+        16384,
+        3
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 16384, consume 3 bytes"
+    },
+    {
+      "entrada": "ffff7f",
+      "esperado": [
+        2097151,
+        3
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 2097151, consume 3 bytes"
+    },
+    {
+      "entrada": "80808001",
+      "esperado": [
+        2097152,
+        4
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 2097152, consume 4 bytes"
+    },
+    {
+      "entrada": "ffffffff0f",
+      "esperado": [
+        4294967295,
+        5
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 4294967295, consume 5 bytes"
+    },
+    {
+      "entrada": "8080808010",
+      "esperado": [
+        4294967296,
+        5
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 4294967296, consume 5 bytes"
+    },
+    {
+      "entrada": "80808080808080808001",
+      "esperado": [
+        9223372036854775808,
+        10
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 9223372036854775808, consume 10 bytes"
+    },
+    {
+      "entrada": "ffffffffffffffff7f",
+      "esperado": [
+        9223372036854775807,
+        9
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 9223372036854775807, consume 9 bytes"
+    },
+    {
+      "entrada": "ffffffffffffffffff01",
+      "esperado": [
+        18446744073709551615,
+        10
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 18446744073709551615, consume 10 bytes"
+    },
+    {
+      "entrada": "feffffffffffffffff01",
+      "esperado": [
+        18446744073709551614,
+        10
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación mínima de 18446744073709551614, consume 10 bytes"
+    },
+    {
+      "entrada": "8000",
+      "esperado": [
+        0,
+        2
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación no mínima admitida de 0, consume 2 bytes"
+    },
+    {
+      "entrada": "8100",
+      "esperado": [
+        1,
+        2
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación no mínima admitida de 1, consume 2 bytes"
+    },
+    {
+      "entrada": "ff00",
+      "esperado": [
+        127,
+        2
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación no mínima admitida de 127, consume 2 bytes"
+    },
+    {
+      "entrada": "808000",
+      "esperado": [
+        0,
+        3
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación no mínima admitida de 0, consume 3 bytes"
+    },
+    {
+      "entrada": "808100",
+      "esperado": [
+        128,
+        3
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación no mínima admitida de 128, consume 3 bytes"
+    },
+    {
+      "entrada": "ac8200",
+      "esperado": [
+        300,
+        3
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación no mínima admitida de 300, consume 3 bytes"
+    },
+    {
+      "entrada": "808080808080808000",
+      "esperado": [
+        0,
+        9
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación no mínima admitida de 0, consume 9 bytes"
+    },
+    {
+      "entrada": "80808080808080808000",
+      "esperado": [
+        0,
+        10
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación no mínima admitida de 0, consume 10 bytes"
+    },
+    {
+      "entrada": "81808080808080808000",
+      "esperado": [
+        1,
+        10
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación no mínima admitida de 1, consume 10 bytes"
+    },
+    {
+      "entrada": "ffffffffffffffffff00",
+      "esperado": [
+        9223372036854775807,
+        10
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: codificación no mínima admitida de 9223372036854775807, consume 10 bytes"
+    },
+    {
+      "entrada": "",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: entrada vacía; Go n=0 se normaliza a null"
+    },
+    {
+      "entrada": "80",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: 1 bytes de continuación sin terminador"
+    },
+    {
+      "entrada": "8080",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: 2 bytes de continuación sin terminador"
+    },
+    {
+      "entrada": "808080",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: 3 bytes de continuación sin terminador"
+    },
+    {
+      "entrada": "8080808080808080",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: 8 bytes de continuación sin terminador"
+    },
+    {
+      "entrada": "808080808080808080",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: 9 bytes de continuación sin terminador"
+    },
+    {
+      "entrada": "80808080808080808080808080808080",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: 16 bytes de continuación sin terminador"
+    },
+    {
+      "entrada": "ffffffffffffffffff",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: nueve bytes 0xff sin terminador"
+    },
+    {
+      "entrada": "80808080808080808002",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: byte diez 0x02 > 1: desbordamiento"
+    },
+    {
+      "entrada": "80808080808080808003",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: byte diez 0x03 > 1: desbordamiento"
+    },
+    {
+      "entrada": "8080808080808080807f",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: byte diez 0x7f > 1: desbordamiento"
+    },
+    {
+      "entrada": "80808080808080808080",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: byte diez 0x80 > 1: desbordamiento"
+    },
+    {
+      "entrada": "80808080808080808081",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: byte diez 0x81 > 1: desbordamiento"
+    },
+    {
+      "entrada": "808080808080808080ff",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: byte diez 0xff > 1: desbordamiento"
+    },
+    {
+      "entrada": "ffffffffffffffffff02",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: desbordamiento tras nueve grupos de payload 127"
+    },
+    {
+      "entrada": "8080808080808080808000",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: terminador en byte once, demasiado tarde"
+    },
+    {
+      "entrada": "8080808080808080800200",
+      "esperado": null,
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: terminador posterior no repara desbordamiento en byte diez"
+    },
+    {
+      "entrada": "0001",
+      "esperado": [
+        0,
+        1
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: bytes sobrantes ignorados; primer valor 0, consume 1 bytes"
+    },
+    {
+      "entrada": "01ff",
+      "esperado": [
+        1,
+        1
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: bytes sobrantes ignorados; primer valor 1, consume 1 bytes"
+    },
+    {
+      "entrada": "7f8000",
+      "esperado": [
+        127,
+        1
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: bytes sobrantes ignorados; primer valor 127, consume 1 bytes"
+    },
+    {
+      "entrada": "ac02ffff",
+      "esperado": [
+        300,
+        2
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: bytes sobrantes ignorados; primer valor 300, consume 2 bytes"
+    },
+    {
+      "entrada": "8000ff",
+      "esperado": [
+        0,
+        2
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: bytes sobrantes ignorados; primer valor 0, consume 2 bytes"
+    },
+    {
+      "entrada": "00ffffffffffffffffffffffffffffff",
+      "esperado": [
+        0,
+        1
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: bytes sobrantes ignorados; primer valor 0, consume 1 bytes"
+    },
+    {
+      "entrada": "80808080808080808001ffffffffffff",
+      "esperado": [
+        9223372036854775808,
+        10
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: bytes sobrantes ignorados; primer valor 9223372036854775808, consume 10 bytes"
+    },
+    {
+      "entrada": "ffffffffffffffffff01808080808080",
+      "esperado": [
+        18446744073709551615,
+        10
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: bytes sobrantes ignorados; primer valor 18446744073709551615, consume 10 bytes"
+    },
+    {
+      "entrada": "80808080808080808000ffffffffffff",
+      "esperado": [
+        0,
+        10
+      ],
+      "fuente": "Derivado de memoria de Go encoding/binary.Uvarint y EXP-015, Funciones: bytes sobrantes ignorados; primer valor 0, consume 10 bytes"
+    }
+  ]
+}

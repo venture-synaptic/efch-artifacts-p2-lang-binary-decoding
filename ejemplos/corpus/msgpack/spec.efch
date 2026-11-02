@@ -1,0 +1,29 @@
+; Entero de MessagePack: fixint positivo y negativo, uint8..64 e int8..64. EXP-005.
+(efch 0.1
+  (computation msgpack-int-decode
+    (doc "Devuelve los 64 bits (los negativos en complemento a dos), si el formato es con signo y los bytes consumidos.")
+    (input buf (bytes 9))
+    (output (option (bv 64) bool (bv 8)))
+    (semantics
+      (ite (eq (len buf) 0)
+           none
+           (let ((b0 (byte buf 0)))
+             (ite (ult b0 #x80)
+                  (some (zext 64 b0) false 1)
+                  (ite (uge b0 #xe0)
+                       (some (sext 64 b0) true 1)
+                       (ite (any (ult b0 #xcc) (ugt b0 #xd3))
+                            none
+                            (let ((sg (uge b0 #xd0)) (k (shl (bv 8 1) (and b0 3))))
+                              (ite (ult (len buf) (add (zext 16 k) 1))
+                                   none
+                                   (let ((u (reduce or j 1 9
+                                              (ite (ule (bv 8 j) k)
+                                                   (shl (zext 64 (byte buf j)) (zext 64 (mul 8 (sub k j))))
+                                                   (bv 64 0))))
+                                         (sh (zext 64 (mul 8 (sub 8 k)))))
+                                     (some (ite sg (ashr (shl u sh) sh) u) sg (add k 1)))))))))))
+    (workload (seeds 20261020 1 2) (count 10000) (input buf (random-bytes 1 9)))
+    (objective (minimize time))
+    (budget (llm-calls 0) (smt-seconds 120)))
+  (baseline-c "baseline.c"))

@@ -1,0 +1,26 @@
+// Nombre de host (RFC 1123 §2.1, RFC 952) en formato de cable DNS (RFC 1035 §3.1 y §4.1.4). EXP-008.
+// Segunda escritura: salida temprana con guardas `if ... { return ... }` (una rama termina y la otra
+// sigue, así que el traductor no duplica la continuación) y el estado en una sola variable, que se
+// actualiza con un `if` de expresión (el traductor 0.1 duplica las ramas de un `if` de sentencias por
+// cada variable asignada).
+fn ldh(c: u8) -> bool {
+    return c | 0x20 >= 0x61 && c | 0x20 <= 0x7a || c >= 0x30 && c <= 0x39 || c == 0x2d
+}
+
+fn dns_hostname_wire(b: bytes[64]) -> option(u8, u8, u16) implements dns-hostname-wire {
+    var st: u32 = 0            // bits 0-7: próximo octeto de longitud; 8-15: inicio de la etiqueta; 16-23: etiquetas
+    for i in 0..b.len {
+        let c = b[i]
+        let pos = st & 0xff
+        let start = st >> 8 & 0xff
+        let labels = st >> 16
+        if i == pos && c == 0 { return some((i + 1) as u8, labels as u8, 0xffff) }
+        if i == pos && c & 0xc0 == 0xc0 && i + 1 < b.len {
+            return some((i + 2) as u8, labels as u8, u16(c & 0x3f) << 8 | b[i + 1])
+        }
+        if i == pos && (c & 0xc0 != 0 || i + c >= b.len) { return none }
+        if i != pos && (!ldh(c) || c == 0x2d && (i == start + 1 || i + 1 == pos)) { return none }
+        st = if i == pos { (i + 1 + c) | u32(i) << 8 | labels + 1 << 16 } else { st }
+    }
+    return none
+}

@@ -1,0 +1,13 @@
+// Varint sin signo de Protocol Buffers con la semántica de Go encoding/binary.Uvarint. EXP-015.
+fn varint_u64(b: bytes[16]) -> option(u64, u8) implements varint-u64 {
+    var v: u64 = 0
+    for i in 0..min(b.len, 10) {
+        let x = b[i]
+        if x < 0x80 {
+            if i == 9 && x > 1 { return none }
+            return some(v | u64(x) << (7 * i), i + 1)
+        }
+        v |= u64(x & 0x7f) << (7 * i)
+    }
+    return none
+}

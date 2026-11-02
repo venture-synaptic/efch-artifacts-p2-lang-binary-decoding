@@ -1,0 +1,15 @@
+// CompactSize de Bitcoin, solo en forma canónica. EXP-005.
+fn compactsize_decode(buf: bytes[9]) -> option(u64, u8) implements compactsize-decode {
+    if buf.len == 0 { return none }
+    let tag = buf[0]
+    if tag < 0xfd { return some(tag, 1) }
+    let n: u8 = if tag == 0xfd { 2 } else if tag == 0xfe { 4 } else { 8 }
+    if buf.len < n + 1 { return none }
+    var v: u64 = 0
+    for i in 0..n {
+        v |= u64(buf[i + 1]) << (8 * i)
+    }
+    let min: u64 = if n == 2 { 0xfd } else if n == 4 { 0x10000 } else { 0x100000000 }
+    if v < min { return none }
+    return some(v, n + 1)
+}

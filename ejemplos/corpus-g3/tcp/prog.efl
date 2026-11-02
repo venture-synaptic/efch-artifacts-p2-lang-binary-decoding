@@ -1,0 +1,45 @@
+// Opciones de la cabecera TCP (RFC 9293 §3.1 y §3.2; RFC 7323 §2.2–2.3; RFC 2018 §2). EXP-010.
+// Un `fold` de 40 pasos sobre `step`, que avanza una opción. Estado en 64 bits: posición (bits 0–7),
+// fin (8), error (9), MSS (16–31) y visto (32), escala (40–47) y vista (48), SACK permitido (49).
+fn hdr_len(b: bytes[60]) -> u16 {
+    if b.len < 20 { return 0 }
+    return u16(b[12] >> 4) * 4
+}
+
+fn step(b: bytes[60], s: u64) -> u64 {
+    let hl = hdr_len(b)
+    let p = (s & 0xff) as u16
+    if s & 0x300 != 0 || p >= hl || hl > b.len { return s }
+    let k = b[p]
+    if k == 0 { return s | 0x100 }
+    if k == 1 { return s + 1 }
+    let err = s | 0x200
+    if p + 1 >= hl { return err }
+    let l = b[p + 1]
+    if l < 2 || p + l > hl { return err }
+    let base = s & 0xffffffffffffff00 | u64(p + l)
+    if k == 2 {
+        if l != 4 || s & 0x100000000 != 0 { return err }
+        return base | u64(b[p + 2]) << 24 | u64(b[p + 3]) << 16 | 0x100000000
+    }
+    if k == 3 {
+        if l != 3 || s & 0x1000000000000 != 0 { return err }
+        return base | u64(min(b[p + 2], 14)) << 40 | 0x1000000000000
+    }
+    if k == 4 {
+        if l != 2 || s & 0x2000000000000 != 0 { return err }
+        return base | 0x2000000000000
+    }
+    return base
+}
+
+fn tcp_options(b: bytes[60]) -> option(u8, u16, u8, bool) implements tcp-options {
+    if b.len < 20 { return none }
+    let hl = hdr_len(b)
+    if b[12] >> 4 < 5 || hl > b.len { return none }
+    let s = fold k in 0..40 from u64(20) with st { step(b, st) }
+    if s & 0x200 != 0 { return none }
+    let mss = if s & 0x100000000 == 0 { u16(0xffff) } else { (s >> 16) as u16 }
+    let ws = if s & 0x1000000000000 == 0 { u8(0xff) } else { (s >> 40) as u8 }
+    return some(hl as u8, mss, ws, s & 0x2000000000000 != 0)
+}

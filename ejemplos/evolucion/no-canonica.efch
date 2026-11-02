@@ -1,0 +1,14 @@
+; Candidata que implementa el comportamiento de la revisión 3 (acepta no canónicas),
+; escrita con la comprobación de desbordamiento sobre el décimo byte.
+
+(efch 0.1
+  (candidate no-canonica (implements varint-decode)
+    (body
+      (first t 0 10
+        (all (ult t (len buf)) (ult (byte buf t) #x80))
+        (ite (all (eq t 9) (ugt (byte buf 9) 1))
+             none
+             (some (reduce or j 0 (add t 1)
+                     (shl (zext 64 (and (byte buf j) #x7f)) (mul 7 j)))
+                   (add t 1)))
+        none))))
