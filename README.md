@@ -17,6 +17,7 @@ Author: Erik Fisher Cueva Huari, VentureSynaptic Labs — ORCID
 | `docs/lenguaje-efch-*.md` | Reference of the EFCH core and of EFCH Lang 0.1 |
 | `efch/`, `experimentos/`, `ejemplos/`, `tests/` | Code, experiment scripts, corpus (EFCH specifications and programs, handwritten C, Rust, Go and Dafny comparators) and tests |
 | `data/efch-lang-resultados.tar.gz` | Archived evidence of every experiment above, including the adversarial reviews (`resultados/`) |
+| `data/reejecucion-2026-11-02.tar.gz` | Re-execution of EXP-004 and EXP-015 with the code in this package |
 | `paper/` | Manuscript draft and PDF |
 
 The negative experiments (EXP-007, EXP-008, EXP-009) are included with the same visibility as the
@@ -36,6 +37,12 @@ code versions were not preserved. EXP-009 and EXP-010 recorded SHA-256 digests o
 `pipeline`, `smt` and `store` have changed since. EXP-005 did not record code digests. A rerun is
 therefore a re-execution with evolved code, not an exact reproduction; differences from the
 archived results must be reported, not reconciled.
+
+**Re-execution (2 November 2026).** EXP-004 and EXP-015 were re-executed with this code on the original machine
+(`data/reejecucion-2026-11-02.tar.gz`, report in `INFORME.md` inside). EXP-015 reproduces: identical workloads and
+generated C, all vectors and differential inputs pass, both programs proved, M9 ratios 1.030 and 0.965 against 1.027
+and 0.966. In EXP-004 both equivalences are proved again and the compiled object files are byte-identical. EXP-005 and
+EXP-007–EXP-010 were not re-executed.
 
 Only the tests that do not depend on components outside this package are included. With the
 evidence extracted into `resultados/`, they pass: 178 tests, 8 skipped (run on 2 November 2026,
