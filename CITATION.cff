@@ -7,7 +7,7 @@ authors:
     given-names: "Erik Fisher"
     orcid: "https://orcid.org/0000-0001-7268-5510"
     affiliation: "VentureSynaptic Labs"
-repository-code: "https://github.com/venture-synaptic/efch-lang-artifacts"
+repository-code: "https://github.com/venture-synaptic/efch-artifacts-lang"
 license: Apache-2.0
 version: "v1.0-lang"
 date-released: "2026-11-02"

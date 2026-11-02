@@ -70,6 +70,12 @@ Code, experiments and reports were produced by AI agents under the author's dire
 of EXP-005 and EXP-007; Claude Sonnet reviewed EXP-008 and EXP-010. The author is responsible for
 the decisions and interpretation.
 
+## Related artifacts
+
+Other VentureSynaptic Labs artifact packages for EFCH (one repository and DOI per manuscript):
+
+- [efch-artifacts-exp019](https://github.com/venture-synaptic/efch-artifacts-exp019): EXP-019, semantic evidence persistence (DOI [10.5281/zenodo.23873678](https://doi.org/10.5281/zenodo.23873678)).
+
 ## License
 
 - **Code** (`efch/`, `experimentos/`, `scripts/`, `tests/`, and the programs in `ejemplos/`): [Apache-2.0](LICENSE).
